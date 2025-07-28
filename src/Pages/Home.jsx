@@ -55,7 +55,7 @@ function Home() {
                 const data = await response.json();
                 const extractedText = data.text || 'No se pudo extraer texto.';
                 console.log('Texto extraído:', extractedText.substring(0, 100) + '...');
-                
+
                 // Aplicar el mismo filtro de líneas vacías al pdfText para que coincida con sanitizedText
                 let cleanedPdfText = extractedText;
                 if (extractedText && !extractedText.includes('Error') && extractedText !== 'Cargando...') {
