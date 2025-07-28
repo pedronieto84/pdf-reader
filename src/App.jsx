@@ -1,12 +1,24 @@
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Home from './Pages/Home';
 import Result from './Pages/Result';
 
 function App() {
   const [page, setPage] = useState('Home');
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div>
@@ -36,7 +48,7 @@ function App() {
         </div>
       </nav>
       <div className="container" style={{
-        marginTop: window.innerWidth < 1700 ? '-300px' : '0px'
+        marginTop: windowWidth < 1500 ? '-300px' : '0px'
       }}>
         {page === 'Home' && <Home />}
         {page === 'Result' && <Result />}
