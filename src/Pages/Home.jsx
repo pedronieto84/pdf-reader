@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 
 function Home() {
     const [pdfText, setPdfText] = useState('Cargando...');
-    const [pdfStats, setPdfStats] = useState({ numPages: 0, totalCharacters: 0 });
     const [selectedPdf, setSelectedPdf] = useState('sant-boi');
     const [selectedPage, setSelectedPage] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -23,10 +22,6 @@ function Home() {
             if (response.ok) {
                 const data = await response.json();
                 setPdfText(data.text || 'No se pudo extraer texto.');
-                setPdfStats({
-                    numPages: data.numPages || 0,
-                    totalCharacters: data.totalCharacters || 0
-                });
             } else {
                 setPdfText('Error al conectar con el servidor.');
             }
@@ -45,6 +40,13 @@ function Home() {
         setSelectedPdf(e.target.value);
     };
 
+    const handlePageChange = (e) => {
+        const value = parseInt(e.target.value);
+        if (!isNaN(value) && value >= 1) {
+            setSelectedPage(value);
+        }
+    };
+
     const incrementPage = () => {
         setSelectedPage(prev => prev + 1);
     };
@@ -54,15 +56,15 @@ function Home() {
     };
 
     return (
-        <div className="container mt-4">
+        <div style={{ width: '100vw', marginTop: '5px', padding: '0 15px', marginLeft: '-15px', marginRight: '-15px' }}>
             {/* Formulario de selección */}
-            <div className="card mb-4">
+            <div className="card mb-4" style={{ margin: '0 15px' }}>
                 <div className="card-header">
                     <h5>Selector de PDF</h5>
                 </div>
                 <div className="card-body">
-                    <div className="row align-items-center">
-                        <div className="col-md-6">
+                    <div className="row align-items-end">
+                        <div className="col-6">
                             <label htmlFor="pdfSelect" className="form-label">Seleccionar PDF:</label>
                             <select
                                 id="pdfSelect"
@@ -74,14 +76,15 @@ function Home() {
                                 <option value="premia">Premia</option>
                             </select>
                         </div>
-                        <div className="col-md-6">
+                        <div className="col-6">
                             <label className="form-label">Página:</label>
-                            <div className="input-group">
+                            <div className="input-group" style={{ width: '100%' }}>
                                 <button
                                     className="btn btn-outline-secondary"
                                     type="button"
                                     onClick={decrementPage}
                                     disabled={selectedPage <= 1 || loading}
+                                    style={{ minWidth: '40px' }}
                                 >
                                     ←
                                 </button>
@@ -89,13 +92,16 @@ function Home() {
                                     type="number"
                                     className="form-control text-center"
                                     value={selectedPage}
-                                    readOnly
+                                    onChange={handlePageChange}
+                                    min="1"
+                                    style={{ minWidth: '80px' }}
                                 />
                                 <button
                                     className="btn btn-outline-secondary"
                                     type="button"
                                     onClick={incrementPage}
                                     disabled={loading}
+                                    style={{ minWidth: '40px' }}
                                 >
                                     →
                                 </button>
@@ -112,27 +118,27 @@ function Home() {
             </div>
 
             {/* Contenido del PDF */}
-            <div className="row">
-                <div className="col-md-8">
+            <div style={{ display: 'flex', gap: '20px', margin: '0 15px' }}>
+                <div style={{ flex: '2' }}>
                     <div className="border rounded p-4 bg-light">
                         <h4 className="mb-3">Texto extraído del PDF:</h4>
                         <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{pdfText}</pre>
                     </div>
                 </div>
-                <div className="col-md-4">
-                    <div className="border rounded p-4 bg-info text-white">
-                        <h5 className="mb-3">Estadísticas del PDF</h5>
+                <div style={{ flex: '1' }}>
+                    <div className="border rounded p-4 bg-success text-white">
+                        <h5 className="mb-3">Resultado de Sanitations</h5>
                         <div className="mb-2">
-                            <strong>PDF:</strong> {selectedPdf === 'sant-boi' ? 'Sant Boi' : 'Premia'}
+                            <strong>Estado:</strong> Pendiente de implementar
                         </div>
                         <div className="mb-2">
-                            <strong>Página:</strong> {selectedPage.toString().padStart(2, '0')}
+                            <strong>Líneas procesadas:</strong> 0
                         </div>
                         <div className="mb-2">
-                            <strong>Páginas:</strong> {pdfStats.numPages}
+                            <strong>Líneas sanitizadas:</strong> 0
                         </div>
                         <div>
-                            <strong>Caracteres totales:</strong> {pdfStats.totalCharacters.toLocaleString()}
+                            <strong>Tiempo de procesado:</strong> -- ms
                         </div>
                     </div>
                 </div>
