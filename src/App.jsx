@@ -48,7 +48,6 @@ function App() {
         </div>
       </nav>
       <div className="container" style={{
-        marginTop: windowWidth < 1500 ? '-300px' : '0px'
       }}>
         {page === 'Home' && <Home />}
         {page === 'Result' && <Result />}

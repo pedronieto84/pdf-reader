@@ -159,25 +159,34 @@ function Home() {
             </div>
 
             {/* Contenido del PDF */}
-            <div style={{ display: 'flex', gap: '20px', margin: '0 15px', height: '70vh' }}>
+            <div style={{
+                display: 'flex',
+                gap: '20px',
+                margin: '0 15px',
+                height: 'calc(100vh - 160px)'
+            }}>
                 <div style={{ flex: '1' }}>
-                    <div className="border rounded p-4 bg-light" style={{ height: '100%', overflow: 'auto' }}>
+                    <div className="border rounded p-4 bg-light" style={{ height: '100%' }}>
                         <h4 className="mb-3">Texto extraído del PDF:</h4>
-                        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{pdfText}</pre>
+                        <div style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
+                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{pdfText}</pre>
+                        </div>
                     </div>
                 </div>
                 <div style={{ flex: '1' }}>
-                    <div className="border rounded p-4 bg-success text-white" style={{ height: '100%', overflow: 'auto' }}>
+                    <div className="border rounded p-4 bg-success text-white" style={{ height: '100%' }}>
                         <h4 className="mb-3" style={{ color: 'white' }}>Resultado de Sanitations</h4>
-                        <pre style={{
-                            whiteSpace: 'pre-wrap',
-                            wordBreak: 'break-word',
-                            margin: 0,
-                            color: 'white',
-                            fontFamily: 'monospace'
-                        }}>
-                            {sanitizedText || 'Esperando texto para sanitizar...'}
-                        </pre>
+                        <div style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
+                            <pre style={{
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                                margin: 0,
+                                color: 'white',
+                                fontFamily: 'monospace'
+                            }}>
+                                {sanitizedText || 'Esperando texto para sanitizar...'}
+                            </pre>
+                        </div>
                     </div>
                 </div>
             </div>
