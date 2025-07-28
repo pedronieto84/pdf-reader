@@ -2,9 +2,32 @@
 
 import { useEffect, useState, useCallback } from 'react';
 
-function sanitizeObject(object){
-    // Aquí puedes aplicar tu lógica de sanitización al objeto
-    // Por ejemplo, eliminar propiedades innecesarias o formatear valores
+function findClassificacio(array) {
+    const regex = /\b\d{6}\b/;
+    console.log('regex', array);
+    for (let i = 0; i < array.length; i++) {
+        const match = array[i].match(regex);
+        if (match) {
+            console.log('match  found:', match);
+            return match[0]; // Retorna el código de 6 dígitos encontrado
+        }
+    }
+
+    return null; // Si no encuentra ningún código de 6 dígitos
+}
+
+
+
+function sanitizeObject(array) {
+    const object = {}
+    // Classificació 120103 numeric, 6 digits
+    const classificacio = findClassificacio(array);
+    console.log('classificacio:', classificacio);
+    if (classificacio) {
+        
+        object.classificacio = parseInt(classificacio, 10);
+    }
+    console.log('Objeto creado:', object);
     return object; // Retorna el objeto sanitizado
 }
 
@@ -20,7 +43,7 @@ function Home() {
 
 
         if (!text || text === 'Cargando...' || text.includes('Error')) {
-            console.log('Retornando texto sin procesar');
+           
             return text;
         }
 
@@ -69,11 +92,11 @@ function Home() {
         const object = {
             llibre, pag
         }
-        console.log('Objeto creado:', object);
+       
 
         // 6. Crear array de objetos basado en elementos vacíos como puntos de corte
         const objectsArray = [];
-        
+
         let lastCutIndex = 0;
 
         for (let i = 0; i < lines.length; i++) {
@@ -82,10 +105,11 @@ function Home() {
                 const textSegment = lines.slice(lastCutIndex, i);
                 const newObject = {
                     ...object,
-                    text: textSegment
+                    text: textSegment,
+                    objectSanitized: {...sanitizeObject(textSegment)}
                 };
                 objectsArray.push(newObject);
-                
+
                 lastCutIndex = i + 1; // Próximo segmento empieza después del elemento vacío
             }
         }
@@ -93,10 +117,12 @@ function Home() {
         // Añadir el último segmento (desde el último corte hasta el final)
         if (lastCutIndex < lines.length) {
             const textSegment = lines.slice(lastCutIndex);
-            const newObject = {...object,
+            
+            const newObject = {
+                ...object,
                 [`items`]: lines.length,
                 text: textSegment,
-                objectSanitized: sanitizeObject(textSegment)
+                objectSanitized: {...sanitizeObject(textSegment)}
 
             };
             objectsArray.push(newObject);
