@@ -1,14 +1,50 @@
 
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 function Home() {
     const [pdfText, setPdfText] = useState('Cargando...');
+    const [sanitizedText, setSanitizedText] = useState('');
     const [selectedPdf, setSelectedPdf] = useState('sant-boi');
     const [selectedPage, setSelectedPage] = useState(1);
     const [loading, setLoading] = useState(false);
 
-    const fetchTextFromBackend = async (which, page) => {
+    // Función de sanitización - aquí puedes aplicar tu lógica personalizada
+    const sanitizeTextArray = useCallback((text) => {
+        console.log('Función sanitizeTextArray ejecutada con texto:', text ? text.substring(0, 50) + '...' : 'texto vacío');
+        
+        if (!text || text === 'Cargando...' || text.includes('Error')) {
+            console.log('Retornando texto sin procesar');
+            return text;
+        }
+
+        // Convertir el texto en array de líneas
+        let lines = text.split('\n');
+        console.log('Líneas originales:', lines.length);
+
+        // AQUÍ PUEDES EMPEZAR A APLICAR TU LÓGICA DE SANITIZACIÓN
+        // Ejemplo básico - puedes modificar estas reglas:
+
+        // 1. Filtrar líneas vacías
+        lines = lines.filter(line => line.trim().length > 0);
+        console.log('Después de filtrar vacías:', lines.length);
+
+        // 2. Remover líneas que solo contengan números o caracteres especiales
+        lines = lines.filter(line => !/^[\d\s.-_=]+$/.test(line.trim()));
+        console.log('Después de filtrar números/especiales:', lines.length);
+
+        // 3. Remover líneas muy cortas (menos de 3 caracteres)
+        lines = lines.filter(line => line.trim().length >= 3);
+        console.log('Después de filtrar cortas:', lines.length);
+
+        // TODO: Agregar más reglas de sanitización aquí
+
+        const result = lines.join('\n');
+        console.log('Resultado final:', result.substring(0, 100) + '...');
+        return result;
+    }, []);
+
+    const fetchTextFromBackend = useCallback(async (which, page) => {
         setLoading(true);
         try {
             let url = `http://localhost:3001/extract-pdf?which=${which}`;
@@ -21,20 +57,31 @@ function Home() {
             const response = await fetch(url);
             if (response.ok) {
                 const data = await response.json();
-                setPdfText(data.text || 'No se pudo extraer texto.');
+                const extractedText = data.text || 'No se pudo extraer texto.';
+                console.log('Texto extraído:', extractedText.substring(0, 100) + '...');
+                setPdfText(extractedText);
+
+                // Aplicar sanitización al texto extraído
+                const sanitized = sanitizeTextArray(extractedText);
+                console.log('Texto sanitizado:', sanitized.substring(0, 100) + '...');
+                setSanitizedText(sanitized);
             } else {
-                setPdfText('Error al conectar con el servidor.');
+                const errorText = 'Error al conectar con el servidor.';
+                setPdfText(errorText);
+                setSanitizedText(errorText);
             }
         } catch (e) {
             console.error('Error al obtener el texto del PDF:', e);
-            setPdfText('Error al conectar con el servidor.');
+            const errorText = 'Error al conectar con el servidor.';
+            setPdfText(errorText);
+            setSanitizedText(errorText);
         }
         setLoading(false);
-    };
+    }, [sanitizeTextArray]);
 
     useEffect(() => {
         fetchTextFromBackend(selectedPdf, selectedPage);
-    }, [selectedPdf, selectedPage]);
+    }, [selectedPdf, selectedPage, fetchTextFromBackend]);
 
     const handlePdfChange = (e) => {
         setSelectedPdf(e.target.value);
@@ -128,17 +175,28 @@ function Home() {
                 <div style={{ flex: '1' }}>
                     <div className="border rounded p-4 bg-success text-white">
                         <h5 className="mb-3">Resultado de Sanitations</h5>
-                        <div className="mb-2">
-                            <strong>Estado:</strong> Pendiente de implementar
+                        <div className="mb-3">
+                            <strong>Texto Sanitizado:</strong>
                         </div>
-                        <div className="mb-2">
-                            <strong>Líneas procesadas:</strong> 0
-                        </div>
-                        <div className="mb-2">
-                            <strong>Líneas sanitizadas:</strong> 0
-                        </div>
-                        <div>
-                            <strong>Tiempo de procesado:</strong> -- ms
+                        <div style={{
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            padding: '10px',
+                            borderRadius: '5px',
+                            maxHeight: '400px',
+                            overflowY: 'auto'
+                        }}>
+                            <pre style={{
+                                whiteSpace: 'pre-wrap',
+                                wordBreak: 'break-word',
+                                margin: 0,
+                                fontSize: '12px',
+                                color: 'white'
+                            }}>
+                                {sanitizedText || 'Esperando texto para sanitizar...'}
+                            </pre>
+                            <div style={{ marginTop: '10px', fontSize: '10px', opacity: 0.8 }}>
+                                Debug: Estado sanitizedText = "{sanitizedText ? 'CON CONTENIDO' : 'VACÍO'}"
+                            </div>
                         </div>
                     </div>
                 </div>
