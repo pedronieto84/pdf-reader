@@ -5,6 +5,15 @@ export interface PDFData {
 
 export interface SanitizedObject {
     classificacio?: number;
+    numeroDeBe: number;
+    quantitat: number | null;
+    descripcio: string;
+    centreGestor: number | null;
+    centreDeCost: number | null;
+    titolAdquisicio: string; // QUIZAS ES UN ENUM
+    costAdquisicio: string | number;
+    dataAlta: string; // Formato dd/mm/yyyy
+    
 }
 
 export interface TextSegmentObject {
