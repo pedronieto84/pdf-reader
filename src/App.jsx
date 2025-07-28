@@ -35,7 +35,9 @@ function App() {
           </ul>
         </div>
       </nav>
-      <div className="container" style={{ marginTop: '80px' }}>
+      <div className="container" style={{
+        marginTop: window.innerWidth < 1700 ? '-300px' : '0px'
+      }}>
         {page === 'Home' && <Home />}
         {page === 'Result' && <Result />}
       </div>

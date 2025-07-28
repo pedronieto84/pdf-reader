@@ -103,9 +103,9 @@ function Home() {
     };
 
     return (
-        <div style={{ width: '100vw', marginTop: '5px', padding: '0 15px', marginLeft: '-15px', marginRight: '-15px' }}>
+        <div style={{ width: '100vw', marginTop: '0px', padding: '0px 0px', marginLeft: '-15px', marginRight: '-15px' }}>
             {/* Formulario de selección */}
-            <div className="card mb-4" style={{ margin: '0 15px' }}>
+            <div className="card" style={{ margin: '0 15px', marginBottom: '15px' }}>
                 <div className="card-header">
                     <h5>Selector de PDF</h5>
                 </div>
