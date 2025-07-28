@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 
 function Home() {
-    const [pdfText, setPdfText] = useState('Cargando...');
+    const [pdfText, setPdfText] = useState('');
     const [sanitizedText, setSanitizedText] = useState('');
     const [selectedPdf, setSelectedPdf] = useState('sant-boi');
     const [selectedPage, setSelectedPage] = useState(1);
@@ -29,9 +29,9 @@ function Home() {
         lines = lines.filter(line => line.trim().length > 0);
         console.log('Después de filtrar vacías:', lines.length);
 
-   
 
- 
+
+
 
         // TODO: Agregar más reglas de sanitización aquí
 
@@ -55,7 +55,15 @@ function Home() {
                 const data = await response.json();
                 const extractedText = data.text || 'No se pudo extraer texto.';
                 console.log('Texto extraído:', extractedText.substring(0, 100) + '...');
-                setPdfText(extractedText);
+                
+                // Aplicar el mismo filtro de líneas vacías al pdfText para que coincida con sanitizedText
+                let cleanedPdfText = extractedText;
+                if (extractedText && !extractedText.includes('Error') && extractedText !== 'Cargando...') {
+                    let lines = extractedText.split('\n');
+                    lines = lines.filter(line => line.trim().length > 0);
+                    cleanedPdfText = lines.join('\n');
+                }
+                setPdfText(cleanedPdfText);
 
                 // Aplicar sanitización al texto extraído
                 const sanitized = sanitizeTextArray(extractedText);
@@ -170,18 +178,10 @@ function Home() {
                     </div>
                 </div>
                 <div style={{ flex: '1' }}>
-                    <div className="border rounded p-4 bg-success text-white" style={{ height: '100%' }}>
-                        <h4 className="mb-3" style={{ color: 'white' }}>Resultado de Sanitations</h4>
+                    <div className="border rounded p-4 bg-light" style={{ height: '100%' }}>
+                        <h4 className="mb-3">Resultado de Sanitations</h4>
                         <div style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
-                            <pre style={{
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-word',
-                                margin: 0,
-                                color: 'white',
-                                fontFamily: 'monospace'
-                            }}>
-                                {sanitizedText || 'Esperando texto para sanitizar...'}
-                            </pre>
+                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{sanitizedText}</pre>
                         </div>
                     </div>
                 </div>
