@@ -13,14 +13,34 @@ app.use(cors());
 app.get('/extract-pdf', async (req, res) => {
     try {
         const which = req.query.which || 'sant-boi'; // Valor por defecto
+        const page = req.query.page; // Parámetro de página específica
 
-        let pdfFileName;
+        let pdfPath;
+        let fileName;
+
+        // Lógica combinada: which + page (opcional)
         switch (which) {
             case 'sant-boi':
-                pdfFileName = 'SantBoi-relacioBens.pdf';
+                if (page) {
+                    // PDF dividido de SantBoi
+                    fileName = `/SantBoiLluçanes-relacioBens-${page}.pdf`;
+                    pdfPath = path.resolve(__dirname, `..src/assets/pdf-dividido/SantBoi-relacioBens${fileName}`);
+                } else {
+                    // PDF completo de SantBoi
+                    fileName = 'SantBoi-relacioBens.pdf';
+                    pdfPath = path.resolve(__dirname, `../src/assets/${fileName}`);
+                }
                 break;
             case 'premia':
-                pdfFileName = 'Premia-llibreA-001.pdf';
+                if (page) {
+                    // Para futuro: PDFs divididos de Premia
+                    fileName = `Premia-llibreA-${page}.pdf`;
+                    pdfPath = path.resolve(__dirname, `../assets/pdf-dividido/${fileName}`);
+                } else {
+                    // PDF completo de Premia
+                    fileName = 'Premia-llibreA-001.pdf';
+                    pdfPath = path.resolve(__dirname, `../src/assets/${fileName}`);
+                }
                 break;
             default:
                 return res.status(400).json({
@@ -29,32 +49,31 @@ app.get('/extract-pdf', async (req, res) => {
                 });
         }
 
-        const pdfPath = path.resolve(__dirname, `../src/assets/${pdfFileName}`);
-
         // Verificar que el archivo existe
         if (!fs.existsSync(pdfPath)) {
             return res.status(404).json({
-                error: `Archivo no encontrado: ${pdfFileName}`,
-                path: pdfPath
+                error: `Archivo no encontrado: ${fileName}`,
+                path: pdfPath,
+                suggestion: page ? `Verificar que existe la página ${page} para ${which} en pdf-dividido/` : 'Verificar ruta del PDF'
             });
         }
 
         const dataBuffer = fs.readFileSync(pdfPath);
         const data = await pdfParse(dataBuffer);
         res.json({
-            fileName: pdfFileName,
+            fileName: fileName,
             which: which,
+            page: page || 'completo',
             text: data.text,
             lines: data.text.split('\n'),
             numPages: data.numpages,
-            totalCharacters: data.text.length
+            totalCharacters: data.text.length,
+            source: page ? 'pdf-dividido' : 'src/assets'
         });
     } catch (err) {
         res.status(500).json({ error: 'Error al leer el PDF', details: err.message });
     }
-});
-
-app.listen(PORT, () => {
+}); app.listen(PORT, () => {
     console.log(`PDF Reader backend listening on port ${PORT}`);
 });
 
