@@ -71,7 +71,7 @@ function Home(): React.JSX.Element {
                 const textSegment = lines.slice(lastCutIndex, i);
                 const newObject: TextSegmentObject = {
                     ...object,
-                    text: textSegment,
+                  
                     objectSanitized: { ...sanitizeObject(textSegment) }
                 };
                 objectsArray.push(newObject);
@@ -85,7 +85,7 @@ function Home(): React.JSX.Element {
             const newObject: TextSegmentObject = {
                 ...object,
                 items: lines.length,
-                text: textSegment,
+                
                 objectSanitized: { ...sanitizeObject(textSegment) }
             };
             objectsArray.push(newObject);

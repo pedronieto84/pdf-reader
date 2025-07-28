@@ -14,6 +14,19 @@ export function findClassificacio(array: string[]): string | null {
     return null; // Si no encuentra ningún código de 6 dígitos
 }
 
+ function findNumeroDeBe(item:string): number | null {
+    const splitted = item.split(' ');
+    return splitted[0]  ? parseInt(splitted[0]) : null;
+}
+
+ function findQuantitat(item:string):number | null {
+    console.log('item:', item);
+    const splitted = item.split(' ');
+    console.log('splitted:', splitted);
+    return splitted[splitted.length-1] ? parseFloat(splitted[splitted.length-1]) : null;
+}
+    
+
 export function sanitizeObject(array: string[]): SanitizedObject {
     const object: SanitizedObject = {};
     // Classificació 120103 numeric, 6 digits
@@ -22,6 +35,21 @@ export function sanitizeObject(array: string[]): SanitizedObject {
     if (classificacio) {
         object.classificacio = parseInt(classificacio, 10);
     }
+
+    // Encontrar numeroDeBe
+    const numeroDeBe = findNumeroDeBe(array[1]);
+    if(numeroDeBe){
+        object.numeroDeBe = numeroDeBe;
+    }
+
+    // Encontrar quantitat
+    const quantitat = findQuantitat(array[1]);
+    console.log('quantitat', quantitat)
+    
+        object.quantitat = quantitat;
+    
+
+    // Encontrar D.Alta
     console.log('Objeto creado:', object);
     return object; // Retorna el objeto sanitizado
 }
