@@ -50,7 +50,16 @@ function Home() {
             linesWithSeparation.push(lines[i]);
         }
         lines = linesWithSeparation;
-        console.log('Después de añadir separación antes de códigos de 6 dígitos:', lines.length);
+
+        // 5. Cuando encuentres un elemento que contenga alguno de los 2 siguientes Strings: "TOTAL CLASSIFICACIÓ:" O "TOTAL GENERAL:", elimina todos los elementos del array
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i].includes('TOTAL CLASSIFICACIÓ:') || lines[i].includes('TOTAL GENERAL:')) {
+                lines = ["Totales"]; // Cortar el array hasta el elemento anterior al encontrado
+                console.log('Encontrado terminador, cortando array en posición:', i);
+                break; // Salir del bucle una vez encontrado
+            }
+        }
+        console.log('Después de aplicar corte por terminadores:', lines.length);
 
         // TODO: Agregar más reglas de sanitización aquí
 
