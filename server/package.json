@@ -4,12 +4,16 @@
     "main": "index.js",
     "type": "commonjs",
     "scripts": {
-        "start": "node index.js"
+        "start": "node index.js",
+        "dev": "nodemon index.js"
     },
     "dependencies": {
         "cors": "^2.8.5",
         "express": "^4.19.2",
         "pdf-parse": "^1.1.1",
         "pdf2pic": "^3.2.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.1.10"
     }
 }

@@ -24,18 +24,18 @@ app.get('/extract-pdf', async (req, res) => {
                 if (page) {
                     // PDF dividido de SantBoi
                     fileName = `/SantBoiLluçanes-relacioBens-${page}.pdf`;
-                    pdfPath = path.resolve(__dirname, `..src/assets/pdf-dividido/SantBoi-relacioBens${fileName}`);
+                    pdfPath = path.resolve( `../src/assets/pdf-dividido/SantBoi-relacioBens${fileName}`);
                 } else {
                     // PDF completo de SantBoi
                     fileName = 'SantBoi-relacioBens.pdf';
-                    pdfPath = path.resolve(__dirname, `../src/assets/${fileName}`);
+                    pdfPath = path.resolve( `../src/assets/${fileName}`);
                 }
                 break;
             case 'premia':
                 if (page) {
                     // Para futuro: PDFs divididos de Premia
                     fileName = `Premia-llibreA-${page}.pdf`;
-                    pdfPath = path.resolve(__dirname, `../assets/pdf-dividido/${fileName}`);
+                    pdfPath = path.resolve( `../assets/pdf-dividido/${fileName}`);
                 } else {
                     // PDF completo de Premia
                     fileName = 'Premia-llibreA-001.pdf';
