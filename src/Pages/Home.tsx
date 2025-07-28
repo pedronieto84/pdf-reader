@@ -5,6 +5,7 @@ import { TextSegmentObject, PDFData } from '../helpers/interfaces';
 function Home(): React.JSX.Element {
     const [pdfText, setPdfText] = useState<string>('');
     const [sanitizedText, setSanitizedText] = useState<string>('');
+    const [finalObjectsArray, setFinalObjectsArray] = useState<TextSegmentObject[]>([]);
     const [selectedPdf, setSelectedPdf] = useState<string>('sant-boi');
     const [selectedPage, setSelectedPage] = useState<number>(1);
     const [loading, setLoading] = useState<boolean>(false);
@@ -91,6 +92,9 @@ function Home(): React.JSX.Element {
         }
 
         console.log('Array de objetos con segmentos creado:', objectsArray);
+
+        // Guardar el array de objetos en el estado
+        setFinalObjectsArray(objectsArray);
 
         const result = lines.join('\n');
         return result;
@@ -221,7 +225,7 @@ function Home(): React.JSX.Element {
             {/* Contenido del PDF */}
             <div style={{
                 display: 'flex',
-                gap: '20px',
+                gap: '15px',
                 margin: '0 15px',
                 height: 'calc(100vh - 160px)'
             }}>
@@ -295,6 +299,29 @@ function Home(): React.JSX.Element {
                                         </span>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div style={{ flex: '1' }}>
+                    <div className="border rounded p-4 bg-light" style={{ height: '100%' }}>
+                        <h4 className="mb-3">Final Object</h4>
+                        <div style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
+                            <div style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+                                <pre style={{
+                                    whiteSpace: 'pre-wrap',
+                                    wordBreak: 'break-word',
+                                    margin: 0,
+                                    fontSize: '11px',
+                                    lineHeight: '1.3'
+                                }}>
+                                    {loading
+                                        ? 'Cargando...'
+                                        : finalObjectsArray.length > 0
+                                            ? JSON.stringify(finalObjectsArray, null, 2)
+                                            : 'No hay datos para mostrar'
+                                    }
+                                </pre>
                             </div>
                         </div>
                     </div>

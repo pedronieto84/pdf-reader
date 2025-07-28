@@ -1,24 +1,12 @@
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Home from './Pages/Home';
 import Result from './Pages/Result';
 
 function App() {
   const [page, setPage] = useState('Home');
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    // Cleanup
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   return (
     <div>
