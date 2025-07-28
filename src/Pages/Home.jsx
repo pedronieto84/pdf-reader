@@ -11,7 +11,7 @@ function Home() {
 
     // Función de sanitización - aquí puedes aplicar tu lógica personalizada
     const sanitizeTextArray = useCallback((text) => {
-        console.log('Función sanitizeTextArray ejecutada con texto:', text ? text.substring(0, 50) + '...' : 'texto vacío');
+
 
         if (!text || text === 'Cargando...' || text.includes('Error')) {
             console.log('Retornando texto sin procesar');
@@ -20,23 +20,23 @@ function Home() {
 
         // Convertir el texto en array de líneas
         let lines = text.split('\n');
-        console.log('Líneas originales:', lines.length);
 
         // AQUÍ PUEDES EMPEZAR A APLICAR TU LÓGICA DE SANITIZACIÓN
         // Ejemplo básico - puedes modificar estas reglas:
 
         // 1. Filtrar líneas vacías
         lines = lines.filter(line => line.trim().length > 0);
-        console.log('Después de filtrar vacías:', lines.length);
+
+        const llibre = lines[6] || null;
+        const pag = parseInt(lines[2]) || null;
 
         // 2. Eliminar espacios en blanco al principio y al final de cada línea
         lines = lines.map(line => line.trim());
-        console.log('Después de trim:', lines.length);
 
         // 3. Quitar los elementos del array entre las posiciones 0 y 26
         if (lines.length > 27) {
             lines = lines.slice(27);
-            console.log('Después de quitar elementos entre 0 y 26:', lines.length);
+
         }
 
         // 4. Añadir separación antes de líneas con códigos numéricos de 6 dígitos
@@ -55,16 +55,50 @@ function Home() {
         for (let i = 0; i < lines.length; i++) {
             if (lines[i].includes('TOTAL CLASSIFICACIÓ:') || lines[i].includes('TOTAL GENERAL:')) {
                 lines = ["Totales"]; // Cortar el array hasta el elemento anterior al encontrado
-                console.log('Encontrado terminador, cortando array en posición:', i);
+
                 break; // Salir del bucle una vez encontrado
             }
         }
-        console.log('Después de aplicar corte por terminadores:', lines.length);
 
-        // TODO: Agregar más reglas de sanitización aquí
+        const object = {
+            llibre, pag
+        }
+        console.log('Objeto creado:', object);
+
+        // 6. Crear array de objetos basado en elementos vacíos como puntos de corte
+        const objectsArray = [];
+        let currentIndex = 0;
+        let lastCutIndex = 0;
+
+        for (let i = 0; i < lines.length; i++) {
+            if (lines[i] === '') {
+                // Crear objeto con el texto desde el último corte hasta este punto
+                const textSegment = lines.slice(lastCutIndex, i);
+                const newObject = {
+                    ...object,
+                    text: textSegment
+                };
+                objectsArray.push(newObject);
+                currentIndex++;
+                lastCutIndex = i + 1; // Próximo segmento empieza después del elemento vacío
+            }
+        }
+
+        // Añadir el último segmento (desde el último corte hasta el final)
+        if (lastCutIndex < lines.length) {
+            const textSegment = lines.slice(lastCutIndex);
+            const newObject = {...object,
+                [`items`]: lines.length,
+                text: textSegment,
+
+            };
+            objectsArray.push(newObject);
+        }
+
+        console.log('Array de objetos con segmentos creado:', objectsArray);
 
         const result = lines.join('\n');
-        console.log('Resultado final:', result.substring(0, 100) + '...');
+
         return result;
     }, []);
 
@@ -82,7 +116,7 @@ function Home() {
             if (response.ok) {
                 const data = await response.json();
                 const extractedText = data.text || 'No se pudo extraer texto.';
-                console.log('Texto extraído:', extractedText.substring(0, 100) + '...');
+
 
                 // Aplicar el mismo filtro de líneas vacías al pdfText para que coincida con sanitizedText
                 let cleanedPdfText = extractedText;
@@ -98,7 +132,7 @@ function Home() {
 
                 // Aplicar sanitización al texto extraído
                 const sanitized = sanitizeTextArray(extractedText);
-                console.log('Texto sanitizado:', sanitized.substring(0, 100) + '...');
+
                 setSanitizedText(sanitized);
             } else {
                 const errorText = 'Error al conectar con el servidor.';
