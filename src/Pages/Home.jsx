@@ -29,13 +29,9 @@ function Home() {
         lines = lines.filter(line => line.trim().length > 0);
         console.log('Después de filtrar vacías:', lines.length);
 
-        // 2. Remover líneas que solo contengan números o caracteres especiales
-        lines = lines.filter(line => !/^[\d\s.-_=]+$/.test(line.trim()));
-        console.log('Después de filtrar números/especiales:', lines.length);
+   
 
-        // 3. Remover líneas muy cortas (menos de 3 caracteres)
-        lines = lines.filter(line => line.trim().length >= 3);
-        console.log('Después de filtrar cortas:', lines.length);
+ 
 
         // TODO: Agregar más reglas de sanitización aquí
 
