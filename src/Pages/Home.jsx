@@ -29,9 +29,28 @@ function Home() {
         lines = lines.filter(line => line.trim().length > 0);
         console.log('Después de filtrar vacías:', lines.length);
 
+        // 2. Eliminar espacios en blanco al principio y al final de cada línea
+        lines = lines.map(line => line.trim());
+        console.log('Después de trim:', lines.length);
 
+        // 3. Quitar los elementos del array entre las posiciones 0 y 26
+        if (lines.length > 27) {
+            lines = lines.slice(27);
+            console.log('Después de quitar elementos entre 0 y 26:', lines.length);
+        }
 
-
+        // 4. Añadir separación antes de líneas con códigos numéricos de 6 dígitos
+        const linesWithSeparation = [];
+        for (let i = 0; i < lines.length; i++) {
+            // Verificar si la línea contiene un código numérico de exactamente 6 dígitos (sin comas ni puntos)
+            const hasNumericCode = /\b\d{6}\b/.test(lines[i]);
+            if (hasNumericCode && linesWithSeparation.length > 0) {
+                linesWithSeparation.push(''); // Añadir elemento vacío antes del código
+            }
+            linesWithSeparation.push(lines[i]);
+        }
+        lines = linesWithSeparation;
+        console.log('Después de añadir separación antes de códigos de 6 dígitos:', lines.length);
 
         // TODO: Agregar más reglas de sanitización aquí
 
@@ -61,8 +80,11 @@ function Home() {
                 if (extractedText && !extractedText.includes('Error') && extractedText !== 'Cargando...') {
                     let lines = extractedText.split('\n');
                     lines = lines.filter(line => line.trim().length > 0);
+                    lines = lines.map(line => line.trim());
+
                     cleanedPdfText = lines.join('\n');
                 }
+
                 setPdfText(cleanedPdfText);
 
                 // Aplicar sanitización al texto extraído
@@ -173,7 +195,36 @@ function Home() {
                     <div className="border rounded p-4 bg-light" style={{ height: '100%' }}>
                         <h4 className="mb-3">Texto extraído del PDF:</h4>
                         <div style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
-                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{pdfText}</pre>
+                            <div style={{ fontFamily: 'monospace', fontSize: '14px' }}>
+                                {pdfText && pdfText.split('\n').map((line, index) => (
+                                    <div key={index} style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'flex-start',
+                                        marginBottom: '2px',
+                                        minHeight: '20px'
+                                    }}>
+                                        <span style={{
+                                            whiteSpace: 'pre-wrap',
+                                            wordBreak: 'break-word',
+                                            flex: '1',
+                                            paddingRight: '10px'
+                                        }}>
+                                            {line}
+                                        </span>
+                                        <span style={{
+                                            color: '#888',
+                                            fontSize: '12px',
+                                            fontFamily: 'Arial, sans-serif',
+                                            fontStyle: 'italic',
+                                            minWidth: '30px',
+                                            textAlign: 'right'
+                                        }}>
+                                            {index}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -181,7 +232,36 @@ function Home() {
                     <div className="border rounded p-4 bg-light" style={{ height: '100%' }}>
                         <h4 className="mb-3">Resultado de Sanitations</h4>
                         <div style={{ height: 'calc(100% - 60px)', overflow: 'auto' }}>
-                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{sanitizedText}</pre>
+                            <div style={{ fontFamily: 'monospace', fontSize: '14px' }}>
+                                {sanitizedText && sanitizedText.split('\n').map((line, index) => (
+                                    <div key={index} style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'flex-start',
+                                        marginBottom: '2px',
+                                        minHeight: '20px'
+                                    }}>
+                                        <span style={{
+                                            whiteSpace: 'pre-wrap',
+                                            wordBreak: 'break-word',
+                                            flex: '1',
+                                            paddingRight: '10px'
+                                        }}>
+                                            {line}
+                                        </span>
+                                        <span style={{
+                                            color: '#888',
+                                            fontSize: '12px',
+                                            fontFamily: 'Arial, sans-serif',
+                                            fontStyle: 'italic',
+                                            minWidth: '30px',
+                                            textAlign: 'right'
+                                        }}>
+                                            {index}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
