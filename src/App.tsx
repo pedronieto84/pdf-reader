@@ -1,7 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { useState } from 'react';
 import Home from './Pages/Home';
-import Result from './Pages/Result';
+import Result from './Pages/Result.tsx';
 
 function App(): React.JSX.Element {
     const [page, setPage] = useState<string>('Home');

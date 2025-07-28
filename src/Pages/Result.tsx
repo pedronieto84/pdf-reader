@@ -1,10 +1,5 @@
 import { useState } from 'react';
-
-interface DetectionResult {
-    method?: string;
-    error?: string;
-    [key: string]: any;
-}
+import { DetectionResult } from '../helpers/interfaces';
 
 function Result(): React.JSX.Element {
     const [results, setResults] = useState<DetectionResult | null>(null);
