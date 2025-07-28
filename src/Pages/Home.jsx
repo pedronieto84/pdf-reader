@@ -2,6 +2,12 @@
 
 import { useEffect, useState, useCallback } from 'react';
 
+function sanitizeObject(object){
+    // Aquí puedes aplicar tu lógica de sanitización al objeto
+    // Por ejemplo, eliminar propiedades innecesarias o formatear valores
+    return object; // Retorna el objeto sanitizado
+}
+
 function Home() {
     const [pdfText, setPdfText] = useState('');
     const [sanitizedText, setSanitizedText] = useState('');
@@ -67,7 +73,7 @@ function Home() {
 
         // 6. Crear array de objetos basado en elementos vacíos como puntos de corte
         const objectsArray = [];
-        let currentIndex = 0;
+        
         let lastCutIndex = 0;
 
         for (let i = 0; i < lines.length; i++) {
@@ -79,7 +85,7 @@ function Home() {
                     text: textSegment
                 };
                 objectsArray.push(newObject);
-                currentIndex++;
+                
                 lastCutIndex = i + 1; // Próximo segmento empieza después del elemento vacío
             }
         }
@@ -90,6 +96,7 @@ function Home() {
             const newObject = {...object,
                 [`items`]: lines.length,
                 text: textSegment,
+                objectSanitized: sanitizeObject(textSegment)
 
             };
             objectsArray.push(newObject);
