@@ -39,7 +39,7 @@ app.get('/extract-pdf', async (req, res) => {
                 } else {
                     // PDF completo de Premia
                     fileName = 'Premia-llibreA-001.pdf';
-                    pdfPath = path.resolve(__dirname, `../src/assets/${fileName}`);
+                    pdfPath = path.resolve( `../src/assets/${fileName}`);
                 }
                 break;
             default:
