@@ -12,7 +12,7 @@ function Home() {
     // Función de sanitización - aquí puedes aplicar tu lógica personalizada
     const sanitizeTextArray = useCallback((text) => {
         console.log('Función sanitizeTextArray ejecutada con texto:', text ? text.substring(0, 50) + '...' : 'texto vacío');
-        
+
         if (!text || text === 'Cargando...' || text.includes('Error')) {
             console.log('Retornando texto sin procesar');
             return text;
@@ -155,49 +155,29 @@ function Home() {
                             </div>
                         </div>
                     </div>
-                    {loading && (
-                        <div className="mt-3">
-                            <div className="spinner-border spinner-border-sm me-2" role="status"></div>
-                            Cargando...
-                        </div>
-                    )}
                 </div>
             </div>
 
             {/* Contenido del PDF */}
-            <div style={{ display: 'flex', gap: '20px', margin: '0 15px' }}>
-                <div style={{ flex: '2' }}>
-                    <div className="border rounded p-4 bg-light">
+            <div style={{ display: 'flex', gap: '20px', margin: '0 15px', height: '70vh' }}>
+                <div style={{ flex: '1' }}>
+                    <div className="border rounded p-4 bg-light" style={{ height: '100%', overflow: 'auto' }}>
                         <h4 className="mb-3">Texto extraído del PDF:</h4>
                         <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{pdfText}</pre>
                     </div>
                 </div>
                 <div style={{ flex: '1' }}>
-                    <div className="border rounded p-4 bg-success text-white">
-                        <h5 className="mb-3">Resultado de Sanitations</h5>
-                        <div className="mb-3">
-                            <strong>Texto Sanitizado:</strong>
-                        </div>
-                        <div style={{
-                            backgroundColor: 'rgba(255,255,255,0.1)',
-                            padding: '10px',
-                            borderRadius: '5px',
-                            maxHeight: '400px',
-                            overflowY: 'auto'
+                    <div className="border rounded p-4 bg-success text-white" style={{ height: '100%', overflow: 'auto' }}>
+                        <h4 className="mb-3" style={{ color: 'white' }}>Resultado de Sanitations</h4>
+                        <pre style={{
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-word',
+                            margin: 0,
+                            color: 'white',
+                            fontFamily: 'monospace'
                         }}>
-                            <pre style={{
-                                whiteSpace: 'pre-wrap',
-                                wordBreak: 'break-word',
-                                margin: 0,
-                                fontSize: '12px',
-                                color: 'white'
-                            }}>
-                                {sanitizedText || 'Esperando texto para sanitizar...'}
-                            </pre>
-                            <div style={{ marginTop: '10px', fontSize: '10px', opacity: 0.8 }}>
-                                Debug: Estado sanitizedText = "{sanitizedText ? 'CON CONTENIDO' : 'VACÍO'}"
-                            </div>
-                        </div>
+                            {sanitizedText || 'Esperando texto para sanitizar...'}
+                        </pre>
                     </div>
                 </div>
             </div>
