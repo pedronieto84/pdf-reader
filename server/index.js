@@ -12,10 +12,38 @@ app.use(cors());
 
 app.get('/extract-pdf', async (req, res) => {
     try {
-        const pdfPath = path.resolve(__dirname, '../src/assets/SantBoi-relacioBens.pdf');
+        const which = req.query.which || 'sant-boi'; // Valor por defecto
+
+        let pdfFileName;
+        switch (which) {
+            case 'sant-boi':
+                pdfFileName = 'SantBoi-relacioBens.pdf';
+                break;
+            case 'premia':
+                pdfFileName = 'Premia-llibreA-001.pdf';
+                break;
+            default:
+                return res.status(400).json({
+                    error: 'Parámetro "which" inválido',
+                    validOptions: ['sant-boi', 'premia']
+                });
+        }
+
+        const pdfPath = path.resolve(__dirname, `../src/assets/${pdfFileName}`);
+
+        // Verificar que el archivo existe
+        if (!fs.existsSync(pdfPath)) {
+            return res.status(404).json({
+                error: `Archivo no encontrado: ${pdfFileName}`,
+                path: pdfPath
+            });
+        }
+
         const dataBuffer = fs.readFileSync(pdfPath);
         const data = await pdfParse(dataBuffer);
         res.json({
+            fileName: pdfFileName,
+            which: which,
             text: data.text,
             lines: data.text.split('\n'),
             numPages: data.numpages,
