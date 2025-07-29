@@ -55,11 +55,11 @@ export interface DetectionResult {
 
 export type SituacioPatrimonialType= "PROPIETAT" | "CEDIT A FAVOR" | "CEDIT EN CONTRA" | "ADSCRIT A FAVOR" | "ADSCRIT EN CONTRA" | "ARRENDAT A FAVOR" | "CONCESSIÓ EN CONTRA" | "RETIRADA PERMANENT DE L'ÚS"
 
-export type NaturalesaJuridica = "PATRIMONIAL" | "DOMINI PÚBLIC - ÚS PÚBLIC" | "DOMINI PÚBLIC - SERVEI PÚBLIC" | "COMUNAL" | "PATRIMONI PÚBLIC DEL SÒL"
+export type NaturalesaJuridicaType = "PATRIMONIAL" | "DOMINI PÚBLIC - ÚS PÚBLIC" | "DOMINI PÚBLIC - SERVEI PÚBLIC" | "COMUNAL" | "PATRIMONI PÚBLIC DEL SÒL"
 
-export type Us = "ÚS COMÚ GENERAL" | "ÚS COMÚ ESPECIAL" | "ÚS PRIVATIU"
+export type UsType = "ÚS COMÚ GENERAL" | "ÚS COMÚ ESPECIAL" | "ÚS PRIVATIU"
 
-export type TipusAdquisicio = "COMPRA" 
+export type TipusAdquisicioType = "COMPRA" 
 | "CESSIÓ GRATUÏTA DE LA PROPIETAT O DONACIÓ" 
 | "CESSIÓ URBANÍSTICA OBLIGATÒRIA" 
 | "ALTA PER OBRA EN CURS" 
