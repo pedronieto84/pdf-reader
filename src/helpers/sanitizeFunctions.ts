@@ -108,11 +108,21 @@ export function findClassificacio(array: string[]): string | null {
 }
 
 function findNumeroDeBe(item: string): number | null {
+  // Verificar que el item existe y no es undefined
+  if (!item || typeof item !== "string") {
+    return null;
+  }
+
   const splitted = item.split(" ");
   return splitted[0] ? parseInt(splitted[0]) : null;
 }
 
 function findQuantitat(item: string): number | null {
+  // Verificar que el item existe y no es undefined
+  if (!item || typeof item !== "string") {
+    return null;
+  }
+
   const splitted = item.split(" ");
   return splitted[splitted.length - 1]
     ? parseFloat(splitted[splitted.length - 1])
@@ -200,59 +210,65 @@ export function findUs(array: string[]): string | null {
 export function sanitizeObject(array: string[]): SanitizedObject {
   const object: SanitizedObject = {};
 
+  // Filtrar elementos vacíos para trabajar con un array limpio
+  const cleanArray = array.filter((item) => item.trim().length > 0);
+
   // Classificació 120103 numeric, 6 digits
-  const classificacio = findClassificacio(array);
+  const classificacio = findClassificacio(cleanArray);
   if (classificacio) {
     object.classificacio = parseInt(classificacio);
   }
 
-  // Encontrar numeroDeBe
-  const numeroDeBe = findNumeroDeBe(array[1]);
+  // Encontrar numeroDeBe - usar el primer elemento no vacío después de la clasificación
+  const numeroDeBe =
+    cleanArray.length > 1 ? findNumeroDeBe(cleanArray[1]) : null;
   if (numeroDeBe) {
     object.numeroDeBe = numeroDeBe;
   }
 
-  // Encontrar quantitat
-  const quantitat = findQuantitat(array[1]);
+  // Encontrar quantitat - usar el primer elemento no vacío después de la clasificación
+  const quantitat = cleanArray.length > 1 ? findQuantitat(cleanArray[1]) : null;
   if (quantitat) {
     object.quantitat = quantitat;
   }
   object.quantitat = quantitat;
 
   // Encontrar D.Alta
-  const dAlta = findData(array);
+  const dAlta = findData(cleanArray);
   if (dAlta) {
     object.dataAlta = dAlta;
   }
   object.id = `${object.classificacio}-${object.dataAlta}-${object.numeroDeBe}`; // Genera un ID único basado en classificació, dataAlta y numeroDeBe
 
   // Encontrar tipusAdquisició
-  const tipusAdquisicio = findTipusAdquisició(array) as TipusAdquisicioType;
+  const tipusAdquisicio = findTipusAdquisició(
+    cleanArray
+  ) as TipusAdquisicioType;
   if (tipusAdquisicio) {
     object.tipusAdquisició = tipusAdquisicio;
   }
 
   // Encontrar situacioPatrimonial
 
-  const situacioPatrimonial = findSituacioPatrimonial(array);
+  const situacioPatrimonial = findSituacioPatrimonial(cleanArray);
   if (situacioPatrimonial) {
     object.situacioPatrimonial = situacioPatrimonial as SituacioPatrimonialType;
   }
 
   // Encontrar naturalesaJuridica
 
-  const naturalesaJuridica = findNaturalesaJuridica(array);
+  const naturalesaJuridica = findNaturalesaJuridica(cleanArray);
   if (naturalesaJuridica) {
     object.naturalesaJuridica = naturalesaJuridica as NaturalesaJuridicaType;
   }
 
   // Encontrar us
-  const us = findUs(array);
+  const us = findUs(cleanArray);
   if (us) {
     object.us = us as UsType;
   }
 
-  const arrayClean = array
+  const arrayClean = cleanArray
     .slice(2) // Quita los 2 primeros elementos
     .filter((item) => !/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/.test(item)) // Filtra elementos que sean únicamente alfabéticos
     .join(" "); // Une los elementos filtrados en un string

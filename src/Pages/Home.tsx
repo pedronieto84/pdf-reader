@@ -26,17 +26,20 @@ function Home(): React.JSX.Element {
 
     // 1. Filtrar líneas vacías
     lines = lines.filter((line) => line.trim().length > 0);
+    console.log('lines', lines)
 
     const llibre: string | null = lines[6] || null;
     const pag: number | null = parseInt(lines[2]) || null;
 
     // 2. Eliminar espacios en blanco al principio y al final de cada línea
     lines = lines.map((line) => line.trim());
+    console.log('lines 36', lines)
 
     // 3. Quitar los elementos del array entre las posiciones 0 y 26
     if (lines.length > 27) {
       lines = lines.slice(27);
     }
+    console.log('lines 40', lines)
 
     // 4. Añadir separación antes de líneas con códigos numéricos de 6 dígitos
     const linesWithSeparation: string[] = [];
@@ -49,6 +52,7 @@ function Home(): React.JSX.Element {
       linesWithSeparation.push(lines[i]);
     }
     lines = linesWithSeparation;
+    console.log('lines 55', lines);
 
     // 5. Cuando encuentres un elemento que contenga alguno de los 2 siguientes Strings: "TOTAL CLASSIFICACIÓ:" O "TOTAL GENERAL:", elimina todos los elementos del array
     for (let i = 0; i < lines.length; i++) {
@@ -71,7 +75,7 @@ function Home(): React.JSX.Element {
         break; // Salir del bucle una vez encontrado
       }
     }
-
+    console.log('lines 78', lines);
     const object = {
       llibre,
       pag,
@@ -84,17 +88,19 @@ function Home(): React.JSX.Element {
     for (let i = 0; i < lines.length; i++) {
       if (lines[i] === "") {
         // Crear objeto con el texto desde el último corte hasta este punto
+        console.log('linea 91', lines[i])
         const textSegment = lines.slice(lastCutIndex, i);
         const newObject: TextSegmentObject = {
           ...object,
 
           objectSanitized: { ...sanitizeObject(textSegment) },
         };
+        console.log('linea 98')
         objectsArray.push(newObject);
         lastCutIndex = i + 1; // Próximo segmento empieza después del elemento vacío
       }
     }
-
+console.log('lines 101', lines)
     // Añadir el último segmento (desde el último corte hasta el final)
     if (lastCutIndex < lines.length) {
       const textSegment = lines.slice(lastCutIndex);
@@ -106,6 +112,7 @@ function Home(): React.JSX.Element {
       };
       objectsArray.push(newObject);
     }
+    console.log('lines 113', lines);
 
     console.log("Array de objetos con segmentos creado:", objectsArray);
 
@@ -151,12 +158,12 @@ function Home(): React.JSX.Element {
           const sanitized = sanitizeTextArray(extractedText);
           setSanitizedText(sanitized);
         } else {
-          const errorText = "Error al conectar con el servidor.";
+          const errorText = "Error al conectar con el servidor. 154";
           setPdfText(errorText);
           setSanitizedText(errorText);
         }
       } catch (e) {
-        console.error("Error al obtener el texto del PDF:", e);
+        console.error("Error al obtener el texto del PDF: 159", e);
         const errorText = "Error al conectar con el servidor.";
         setPdfText(errorText);
         setSanitizedText(errorText);
