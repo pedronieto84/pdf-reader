@@ -83,79 +83,17 @@ app.get("/extract-pdf", async (req, res) => {
 // Nuevo endpoint con estrategia alternativa de extracción
 app.get("/extract-pdf-2", async (req, res) => {
   try {
-    const which = req.query.which || "sant-boi"; // Valor por defecto
-    const page = req.query.page; // Parámetro de página específica
-
-    let pdfPath;
-    let fileName;
-
-    // Lógica combinada: which + page (opcional)
-    switch (which) {
-      case "sant-boi":
-        if (page) {
-          // PDF dividido de SantBoi
-          fileName = `/SantBoiLluçanes-relacioBens-${page}.pdf`;
-          pdfPath = path.resolve(
-            `../src/assets/pdf-dividido/SantBoi-relacioBens${fileName}`
-          );
-        } else {
-          // PDF completo de SantBoi
-          fileName = "SantBoi-relacioBens.pdf";
-          pdfPath = path.resolve(`../src/assets/${fileName}`);
-        }
-        break;
-      case "premia":
-        if (page) {
-          // Para futuro: PDFs divididos de Premia
-          fileName = `Premia-llibreA-${page}.pdf`;
-          pdfPath = path.resolve(`../assets/pdf-dividido/${fileName}`);
-        } else {
-          // PDF completo de Premia
-          fileName = "Premia-llibreA-001.pdf";
-          pdfPath = path.resolve(`../src/assets/${fileName}`);
-        }
-        break;
-      default:
-        return res.status(400).json({
-          error: 'Parámetro "which" inválido',
-          validOptions: ["sant-boi", "premia"],
-        });
-    }
-
-    // Verificar que el archivo existe
-    if (!fs.existsSync(pdfPath)) {
-      return res.status(404).json({
-        error: `Archivo no encontrado: ${fileName}`,
-        path: pdfPath,
-        suggestion: page
-          ? `Verificar que existe la página ${page} para ${which} en pdf-dividido/`
-          : "Verificar ruta del PDF",
-      });
-    }
-
     // TODO: Implementar nueva estrategia de extracción aquí
-    // Por ahora, usar la misma lógica que el endpoint original
-    const dataBuffer = fs.readFileSync(pdfPath);
-    const data = await pdfParse(dataBuffer);
 
     res.json({
-      fileName: fileName,
-      which: which,
-      page: page || "completo",
-      text: data.text,
-      lines: data.text.split("\n"),
-      numPages: data.numpages,
-      totalCharacters: data.text.length,
-      source: page ? "pdf-dividido" : "src/assets",
-      extractionMethod: "extract-pdf-2 (nueva estrategia - en desarrollo)",
+      message: "Endpoint extract-pdf-2 preparado para nueva implementación",
+      status: "en desarrollo",
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        error: "Error al leer el PDF con nueva estrategia",
-        details: err.message,
-      });
+    res.status(500).json({
+      error: "Error en extract-pdf-2",
+      details: err.message,
+    });
   }
 });
 
@@ -229,11 +167,9 @@ app.get("/detect-lines-content", async (req, res) => {
       note: "Análisis simulado - implementar parsing de operadores PDF",
     });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        error: "Error al detectar líneas con análisis de contenido",
-        details: err.message,
-      });
+    res.status(500).json({
+      error: "Error al detectar líneas con análisis de contenido",
+      details: err.message,
+    });
   }
 });
