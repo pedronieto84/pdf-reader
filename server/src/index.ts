@@ -4,7 +4,7 @@ import fs from "fs";
 const pdfParse = require("pdf-parse");
 import path from "path";
 import PDFParser from "pdf2json";
-import { parseTableFromPdf2Json, combineTablePages } from "./tableParser";
+import { parseTableFromPdf2Json, combineTablePages } from "./tableParserNew";
 
 const app = express();
 const PORT = 3001;
@@ -90,9 +90,6 @@ app.get("/extract-pdf-2", async (req: Request, res: Response) => {
 
     let pdfPath: string;
     let fileName: string;
-
-    
-    
 
     // Lógica combinada: which + page (opcional)
     switch (which) {
@@ -318,9 +315,11 @@ app.get("/extract-table", async (req: Request, res: Response) => {
     const combinedTable = combineTablePages(tablePagesData);
 
     console.log("=== TABLA PROCESADA ===");
-    console.log(`Total de filas encontradas: ${combinedTable.metadata.totalRows}`);
+    console.log(
+      `Total de filas encontradas: ${combinedTable.metadata.totalRows}`
+    );
     console.log(`Páginas procesadas: ${tablePagesData.length}`);
-    
+
     // Mostrar las primeras filas como ejemplo
     console.log("--- Primeras 3 filas ---");
     combinedTable.rows.slice(0, 3).forEach((row, index) => {
@@ -337,7 +336,6 @@ app.get("/extract-table", async (req: Request, res: Response) => {
       rawPages: tablePagesData, // incluir datos de páginas individuales
       source: page ? "pdf-dividido" : "src/assets",
     });
-
   } catch (err: any) {
     res.status(500).json({
       error: "Error al procesar tabla del PDF",
