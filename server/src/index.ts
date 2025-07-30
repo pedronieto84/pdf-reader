@@ -1,9 +1,10 @@
-import express, { Request, Response } from 'express';
-import cors from 'cors';
-import fs from 'fs';
-const pdfParse = require('pdf-parse');
-import path from 'path';
-import PDFParser from 'pdf2json';
+import express, { Request, Response } from "express";
+import cors from "cors";
+import fs from "fs";
+const pdfParse = require("pdf-parse");
+import path from "path";
+import PDFParser from "pdf2json";
+import { parseTableFromPdf2Json, combineTablePages } from "./tableParser";
 
 const app = express();
 const PORT = 3001;
@@ -12,7 +13,7 @@ app.use(cors());
 
 app.get("/extract-pdf", async (req: Request, res: Response) => {
   try {
-    const which = req.query.which as string || "sant-boi"; // Valor por defecto
+    const which = (req.query.which as string) || "sant-boi"; // Valor por defecto
     const page = req.query.page as string; // Parámetro de página específica
 
     let pdfPath: string;
@@ -84,11 +85,14 @@ app.get("/extract-pdf", async (req: Request, res: Response) => {
 // Nuevo endpoint con estrategia alternativa de extracción
 app.get("/extract-pdf-2", async (req: Request, res: Response) => {
   try {
-    const which = req.query.which as string || "sant-boi"; // Valor por defecto
+    const which = (req.query.which as string) || "sant-boi"; // Valor por defecto
     const page = req.query.page as string; // Parámetro de página específica
 
     let pdfPath: string;
     let fileName: string;
+
+    
+    
 
     // Lógica combinada: which + page (opcional)
     switch (which) {
@@ -167,14 +171,15 @@ app.get("/extract-pdf-2", async (req: Request, res: Response) => {
       console.log(`Total de elementos de relleno (fills): ${fills.length}`);
       console.log(`Dimensiones de página: ${page1.Width} x ${page1.Height}`);
 
-    // Mostrar los primeros 5 elementos de texto como muestra
-    console.log("--- Primeros 5 elementos de texto ---");
-    texts.slice(0, 5).forEach((text: any, index: number) => {
-      const decodedText = decodeURIComponent(text.R?.[0]?.T || "");
-      console.log(
-        `${index + 1}. Posición (${text.x}, ${text.y}): "${decodedText}"`
-      );
-    });      console.log("========================================");
+      // Mostrar los primeros 5 elementos de texto como muestra
+      console.log("--- Primeros 5 elementos de texto ---");
+      texts.slice(0, 5).forEach((text: any, index: number) => {
+        const decodedText = decodeURIComponent(text.R?.[0]?.T || "");
+        console.log(
+          `${index + 1}. Posición (${text.x}, ${text.y}): "${decodedText}"`
+        );
+      });
+      console.log("========================================");
     }
 
     const extractedData = {
@@ -226,6 +231,116 @@ app.get("/extract-pdf-2", async (req: Request, res: Response) => {
   } catch (err: any) {
     res.status(500).json({
       error: "Error en extract-pdf-2 con pdf2json",
+      details: err.message,
+    });
+  }
+});
+
+// Nuevo endpoint para procesar tabla estructurada
+app.get("/extract-table", async (req: Request, res: Response) => {
+  try {
+    const which = (req.query.which as string) || "sant-boi";
+    const page = req.query.page as string;
+
+    let pdfPath: string;
+    let fileName: string;
+
+    // Misma lógica de rutas que extract-pdf-2
+    switch (which) {
+      case "sant-boi":
+        if (page) {
+          fileName = `/SantBoiLluçanes-relacioBens-${page}.pdf`;
+          pdfPath = path.resolve(
+            `../src/assets/pdf-dividido/SantBoi-relacioBens${fileName}`
+          );
+        } else {
+          fileName = "SantBoi-relacioBens.pdf";
+          pdfPath = path.resolve(`../src/assets/${fileName}`);
+        }
+        break;
+      case "premia":
+        if (page) {
+          fileName = `Premia-llibreA-${page}.pdf`;
+          pdfPath = path.resolve(`../assets/pdf-dividido/${fileName}`);
+        } else {
+          fileName = "Premia-llibreA-001.pdf";
+          pdfPath = path.resolve(`../src/assets/${fileName}`);
+        }
+        break;
+      default:
+        return res.status(400).json({
+          error: 'Parámetro "which" inválido',
+          validOptions: ["sant-boi", "premia"],
+        });
+    }
+
+    if (!fs.existsSync(pdfPath)) {
+      return res.status(404).json({
+        error: `Archivo no encontrado: ${fileName}`,
+        path: pdfPath,
+      });
+    }
+
+    // Usar pdf2json para extracción estructurada
+    const pdfParser = new PDFParser();
+
+    const parsePDF = new Promise<any>((resolve, reject) => {
+      pdfParser.on("pdfParser_dataError", (errData: any) => {
+        reject(new Error(errData.parserError));
+      });
+
+      pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+        resolve(pdfData);
+      });
+
+      pdfParser.loadPDF(pdfPath);
+    });
+
+    const pdfData = await parsePDF;
+    const pages = pdfData.Pages || [];
+
+    // Procesar cada página con el parser de tabla
+    const tablePagesData = pages.map((pageData: any, pageIndex: number) => {
+      const textElements = pageData.Texts || [];
+      const processedElements = textElements.map((text: any) => ({
+        x: text.x,
+        y: text.y,
+        width: text.w,
+        height: text.TS ? text.TS[0]?.TS || 0 : 0,
+        text: decodeURIComponent(text.R?.[0]?.T || ""),
+        fontFace: text.TS ? text.TS[0]?.TS || 0 : 0,
+      }));
+
+      return parseTableFromPdf2Json(processedElements, pageIndex + 1);
+    });
+
+    // Combinar todas las páginas si hay múltiples
+    const combinedTable = combineTablePages(tablePagesData);
+
+    console.log("=== TABLA PROCESADA ===");
+    console.log(`Total de filas encontradas: ${combinedTable.metadata.totalRows}`);
+    console.log(`Páginas procesadas: ${tablePagesData.length}`);
+    
+    // Mostrar las primeras filas como ejemplo
+    console.log("--- Primeras 3 filas ---");
+    combinedTable.rows.slice(0, 3).forEach((row, index) => {
+      console.log(`Fila ${index + 1}:`, row);
+    });
+    console.log("=======================");
+
+    res.json({
+      fileName: fileName,
+      which: which,
+      page: page || "completo",
+      extractionMethod: "pdf2json + table parser",
+      table: combinedTable,
+      rawPages: tablePagesData, // incluir datos de páginas individuales
+      source: page ? "pdf-dividido" : "src/assets",
+    });
+
+  } catch (err: any) {
+    res.status(500).json({
+      error: "Error al procesar tabla del PDF",
       details: err.message,
     });
   }
