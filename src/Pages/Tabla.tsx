@@ -1,0 +1,298 @@
+import React, { useState, useEffect, useMemo } from "react";
+import "bootstrap-icons/font/bootstrap-icons.css";
+
+interface TableRow {
+  [key: string]: string | undefined;
+}
+
+interface TableData {
+  headers: string[];
+  rows: TableRow[];
+  metadata: {
+    totalRows: number;
+    totalColumns: number;
+    pageNumber: number;
+  };
+}
+
+interface TableResponse {
+  fileName: string;
+  which: string;
+  page: string;
+  extractionMethod: string;
+  table: TableData;
+  source: string;
+}
+
+const Tabla: React.FC = () => {
+  const [selectedWhich, setSelectedWhich] = useState("sant-boi");
+  const [selectedPage, setSelectedPage] = useState("05");
+  const [tableData, setTableData] = useState<TableResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState("");
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: "asc" | "desc";
+  } | null>(null);
+
+  const pages = Array.from({ length: 40 }, (_, i) => {
+    const pageNum = i + 1;
+    return pageNum.toString().padStart(2, "0");
+  });
+
+  const fetchTableData = async () => {
+    if (!selectedWhich || !selectedPage) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(
+        `http://localhost:3001/extract-table?which=${selectedWhich}&page=${selectedPage}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+
+      const data: TableResponse = await response.json();
+      setTableData(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+      console.error("Error fetching table data:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTableData();
+  }, [selectedWhich, selectedPage]);
+
+  // Filtrar y ordenar datos
+  const processedData = useMemo(() => {
+    if (!tableData?.table.rows) return [];
+
+    let filteredRows = tableData.table.rows.filter((row) => {
+      if (!filter) return true;
+
+      return Object.values(row).some((value) =>
+        value?.toLowerCase().includes(filter.toLowerCase())
+      );
+    });
+
+    // Aplicar ordenamiento
+    if (sortConfig) {
+      filteredRows.sort((a, b) => {
+        const aValue = a[sortConfig.key] || "";
+        const bValue = b[sortConfig.key] || "";
+
+        if (aValue < bValue) {
+          return sortConfig.direction === "asc" ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return filteredRows;
+  }, [tableData, filter, sortConfig]);
+
+  const handleSort = (key: string) => {
+    let direction: "asc" | "desc" = "asc";
+
+    if (
+      sortConfig &&
+      sortConfig.key === key &&
+      sortConfig.direction === "asc"
+    ) {
+      direction = "desc";
+    }
+
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIcon = (columnKey: string) => {
+    if (!sortConfig || sortConfig.key !== columnKey) {
+      return <i className="bi bi-arrow-down-up text-muted ms-1"></i>;
+    }
+
+    return sortConfig.direction === "asc" ? (
+      <i className="bi bi-arrow-up text-primary ms-1"></i>
+    ) : (
+      <i className="bi bi-arrow-down text-primary ms-1"></i>
+    );
+  };
+
+  return (
+    <div className="mt-4">
+      <div className="row">
+        <div className="col-12">
+          <h2 className="mb-4">Tabla de Relación de Bienes</h2>
+
+          {/* Selectores */}
+          <div className="card mb-4">
+            <div className="card-body">
+              <div className="row g-3">
+                <div className="col-md-4">
+                  <label htmlFor="which-select" className="form-label">
+                    Seleccionar documento:
+                  </label>
+                  <select
+                    id="which-select"
+                    className="form-select"
+                    value={selectedWhich}
+                    onChange={(e) => setSelectedWhich(e.target.value)}
+                  >
+                    <option value="sant-boi">Sant Boi de Lluçanès</option>
+                    <option value="premia">Premia</option>
+                  </select>
+                </div>
+
+                <div className="col-md-4">
+                  <label htmlFor="page-select" className="form-label">
+                    Seleccionar página:
+                  </label>
+                  <select
+                    id="page-select"
+                    className="form-select"
+                    value={selectedPage}
+                    onChange={(e) => setSelectedPage(e.target.value)}
+                  >
+                    {pages.map((page) => (
+                      <option key={page} value={page}>
+                        Página {page}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="col-md-4 d-flex align-items-end">
+                  <button
+                    className="btn btn-primary"
+                    onClick={fetchTableData}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" />
+                        Cargando...
+                      </>
+                    ) : (
+                      "Procesar"
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Filtro */}
+          {tableData && (
+            <div className="card mb-4">
+              <div className="card-body">
+                <div className="row">
+                  <div className="col-md-6">
+                    <label htmlFor="filter-input" className="form-label">
+                      Filtrar tabla:
+                    </label>
+                    <input
+                      id="filter-input"
+                      type="text"
+                      className="form-control"
+                      placeholder="Buscar en toda la tabla..."
+                      value={filter}
+                      onChange={(e) => setFilter(e.target.value)}
+                    />
+                  </div>
+                  <div className="col-md-6 d-flex align-items-end">
+                    <div className="text-muted">
+                      Mostrando {processedData.length} de{" "}
+                      {tableData.table.metadata.totalRows} filas
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Error */}
+          {error && (
+            <div className="alert alert-danger" role="alert">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
+
+          {/* Tabla */}
+          {tableData && (
+            <div className="card">
+              <div className="card-header">
+                <h5 className="card-title mb-0">
+                  {tableData.fileName} - {tableData.extractionMethod}
+                </h5>
+                <small className="text-muted">
+                  Fuente: {tableData.source} | Total columnas:{" "}
+                  {tableData.table.metadata.totalColumns}
+                </small>
+              </div>
+              <div className="card-body p-0">
+                <div
+                  className="table-responsive"
+                  style={{ maxHeight: "70vh", overflowY: "auto" }}
+                >
+                  <table className="table table-striped table-hover mb-0">
+                    <thead className="table-dark sticky-top">
+                      <tr>
+                        {tableData.table.headers.map((header) => (
+                          <th
+                            key={header}
+                            scope="col"
+                            className="text-nowrap user-select-none"
+                            style={{ cursor: "pointer", minWidth: "120px" }}
+                            onClick={() => handleSort(header)}
+                          >
+                            {header}
+                            {getSortIcon(header)}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {processedData.length > 0 ? (
+                        processedData.map((row, index) => (
+                          <tr key={index}>
+                            {tableData.table.headers.map((header) => (
+                              <td key={header} className="text-nowrap">
+                                {row[header] || "-"}
+                              </td>
+                            ))}
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td
+                            colSpan={tableData.table.headers.length}
+                            className="text-center py-4 text-muted"
+                          >
+                            {filter
+                              ? "No se encontraron resultados para el filtro aplicado"
+                              : "No hay datos disponibles"}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Tabla;
