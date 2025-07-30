@@ -4,8 +4,11 @@ import Home from "./Pages/Home";
 import Result from "./Pages/Result.tsx";
 import Tabla from "./Pages/Tabla";
 
+// Componente principal con navegación por pestañas
 function App(): React.JSX.Element {
   const [page, setPage] = useState<string>("Home");
+
+  console.log("App rendered, current page:", page); // Debug log
 
   return (
     <div>
@@ -51,8 +54,9 @@ function App(): React.JSX.Element {
                   e.preventDefault();
                   setPage("Tabla");
                 }}
+                style={{ backgroundColor: "yellow" }} // Temporal para debugging
               >
-                Tabla
+                🔥 TABLA 🔥
               </a>
             </li>
           </ul>
