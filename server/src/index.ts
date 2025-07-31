@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 3001;
 
 // Configurar CORS para permitir diferentes orígenes
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
+  origin: process.env.NODE_ENV === 'production'
     ? true // En producción, permitir todos los orígenes
     : ['http://localhost:5173', 'http://localhost:3000'] // En desarrollo
 }));
