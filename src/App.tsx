@@ -1,13 +1,10 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useState } from "react";
-import Home from "./Pages/Home";
-import Result from "./Pages/Result.tsx";
-import Tabla from "./Pages/Tabla";
 import TablaCompleta from "./Pages/TablaCompleta";
 
 // Componente principal con navegación por pestañas
 function App(): React.JSX.Element {
-    const [page, setPage] = useState<string>("Home");
+    const [page, setPage] = useState<string>("TablaCompleta");
 
     console.log("App rendered, current page:", page); // Debug log
 
@@ -18,48 +15,11 @@ function App(): React.JSX.Element {
                     <a
                         className="navbar-brand fw-bold"
                         href="#"
-                        onClick={() => setPage("Home")}
+                        onClick={() => setPage("TablaCompleta")}
                     >
-                        PDF Reader
+                        PDF Reader - Tabla Completa
                     </a>
                     <ul className="navbar-nav d-flex flex-row gap-3">
-                        <li className="nav-item">
-                            <a
-                                className={`nav-link${page === "Home" ? " active" : ""}`}
-                                href="#"
-                                onClick={(e: React.MouseEvent) => {
-                                    e.preventDefault();
-                                    setPage("Home");
-                                }}
-                            >
-                                Home
-                            </a>
-                        </li>
-                        <li className="nav-item">
-                            <a
-                                className={`nav-link${page === "Result" ? " active" : ""}`}
-                                href="#"
-                                onClick={(e: React.MouseEvent) => {
-                                    e.preventDefault();
-                                    setPage("Result");
-                                }}
-                            >
-                                Result
-                            </a>
-                        </li>
-                        <li className="nav-item">
-                            <a
-                                className={`nav-link${page === "Tabla" ? " active" : ""}`}
-                                href="#"
-                                onClick={(e: React.MouseEvent) => {
-                                    e.preventDefault();
-                                    setPage("Tabla");
-                                }}
-                                style={{ backgroundColor: "yellow" }} // Temporal para debugging
-                            >
-                                🔥 TABLA 🔥
-                            </a>
-                        </li>
                         <li className="nav-item">
                             <a
                                 className={`nav-link${page === "TablaCompleta" ? " active" : ""}`}
@@ -69,7 +29,7 @@ function App(): React.JSX.Element {
                                     setPage("TablaCompleta");
                                 }}
                             >
-                                Tabla Completa
+                                📊 Tabla Completa
                             </a>
                         </li>
                     </ul>
@@ -81,10 +41,7 @@ function App(): React.JSX.Element {
                     paddingTop: "80px",
                 }}
             >
-                {page === "Home" && <Home />}
-                {page === "Tabla" && <Tabla />}
                 {page === "TablaCompleta" && <TablaCompleta />}
-                {page === "Result" && <Result />}
             </div>
         </div>
     );

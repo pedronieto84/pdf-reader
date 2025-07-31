@@ -355,7 +355,7 @@ app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
     console.log(`Tipo de tabla: ${table}`);
 
     // Validar parámetros
-    const validWhich = ["sant-boi", "premia"];
+    const validWhich = ["sant-boi", "collbato", "premia-de-dalt"];
     const validTable = ["LlibreA", "relacio-bens"];
 
     if (!validWhich.includes(which)) {
@@ -378,32 +378,31 @@ app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
     let pdfPath: string;
     let fileName: string;
 
-    switch (which) {
-      case "sant-boi":
-        if (table === "relacio-bens") {
-          fileName = "sant-boi-de-llucanes_relacio-bens.pdf";
-          pdfPath = path.resolve("../src/assets/documentos-parseo/sant_boi_de_llucanes", fileName);
-        } else { // LlibreA
-          fileName = "sant-boi-de-llucanes_llibre-a.pdf";
-          pdfPath = path.resolve("../src/assets/documentos-parseo/sant_boi_de_llucanes", fileName);
-        }
-        break;
-      case "premia":
-        if (table === "relacio-bens") {
-          fileName = "premia-de-mar_relacio-bens.pdf";
-          pdfPath = path.resolve("../src/assets/documentos-parseo/premia_de_mar", fileName);
-        } else { // LlibreA
-          fileName = "premia-de-mar_llibre-a.pdf";
-          pdfPath = path.resolve("../src/assets/documentos-parseo/premia_de_mar", fileName);
-        }
-        break;
-      default:
-        return res.status(400).json({
-          error: 'Municipio no soportado',
-          validOptions: validWhich,
-          received: which
-        });
+    // Nuevo patrón de rutas: "../src/assets/documentos-parseo/{which}/{which}_{table}.pdf"
+    const municipioMap: { [key: string]: string } = {
+      "sant-boi": "sant_boi_de_llucanes",
+      "collbato": "collbato", 
+      "premia-de-dalt": "premia_de_dalt"
+    };
+
+    const tableMap: { [key: string]: string } = {
+      "relacio-bens": "relacio-bens",
+      "LlibreA": "llibre-a"
+    };
+
+    const municipioFolder = municipioMap[which];
+    const tableType = tableMap[table];
+    
+    if (!municipioFolder || !tableType) {
+      return res.status(400).json({
+        error: 'Configuración de municipio o tabla no encontrada',
+        which: which,
+        table: table
+      });
     }
+
+    fileName = `${municipioFolder}_${tableType}.pdf`;
+    pdfPath = path.resolve("../src/assets/documentos-parseo", municipioFolder, fileName);
 
     console.log(`Intentando cargar: ${pdfPath}`);
 
