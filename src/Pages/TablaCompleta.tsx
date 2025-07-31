@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import "bootstrap-icons/font/bootstrap-icons.css";
+import { buildApiUrl } from "../config/api";
 
 interface TableRow {
     [key: string]: string | undefined;
@@ -53,7 +54,7 @@ const TablaCompleta: React.FC = () => {
         setError(null);
 
         try {
-            const url = `http://localhost:3001/extract-full-pdf-table?which=${selectedWhich}&table=${selectedTable}`;
+            const url = buildApiUrl(`/extract-full-pdf-table?which=${selectedWhich}&table=${selectedTable}`);
             console.log('Fetching from URL:', url);
 
             const response = await fetch(url);

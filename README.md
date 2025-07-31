@@ -36,6 +36,10 @@ Un sistema completo para la extracción y análisis de datos de documentos PDF m
 ### Opción 2: Docker
 - **Docker** y **Docker Compose**
 
+### Opción 3: Firebase App Hosting
+- **Firebase CLI**
+- **Cuenta de Google Cloud Platform**
+
 ## 🔧 Instalación
 
 ### Opción 1: Con Docker (Más Simple)
@@ -92,6 +96,24 @@ Para detener los servicios:
 ```bash
 docker-compose down
 ```
+
+### Opción 3: Firebase App Hosting (Producción)
+
+```bash
+# Instalar Firebase CLI
+npm install -g firebase-tools
+
+# Autenticarse con Firebase
+firebase login
+
+# Desplegar a Firebase App Hosting
+firebase apphosting:backends:create
+```
+
+El proyecto se optimiza automáticamente para producción:
+- Frontend se construye estáticamente y se sirve desde el backend
+- Backend maneja tanto API como archivos estáticos
+- Se adapta automáticamente al puerto dinámico de Cloud Run
 
 ### Opción 2: Desarrollo Local
 

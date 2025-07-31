@@ -7,9 +7,23 @@ import PDFParser from "pdf2json";
 import { parseTableFromPdf2Json, combineTablePages } from "./tableParserNew";
 
 const app = express();
-const PORT = 3001;
+// Usar el puerto dinámico de Cloud Run o 3001 para desarrollo local
+const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// Configurar CORS para permitir diferentes orígenes
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? true // En producción, permitir todos los orígenes
+    : ['http://localhost:5173', 'http://localhost:3000'] // En desarrollo
+}));
+
+// Middleware para parsear JSON
+app.use(express.json());
+
+// Servir archivos estáticos del frontend en producción
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../../dist')));
+}
 
 app.get("/extract-pdf", async (req: Request, res: Response) => {
   try {
@@ -498,8 +512,16 @@ app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
   }
 });
 
+// Manejar rutas del SPA - debe ir al final, después de todas las rutas API
+if (process.env.NODE_ENV === 'production') {
+  app.get('*', (req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, '../../dist/index.html'));
+  });
+}
+
 app.listen(PORT, () => {
   console.log(`PDF Reader backend listening on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 // Endpoint 1: Detectar líneas usando análisis de texto (simulado como detección de imagen)

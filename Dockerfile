@@ -1,11 +1,8 @@
-# Dockerfile único para frontend y backend
+# Dockerfile para Firebase App Hosting (Cloud Run)
 FROM node:20.17.0-alpine
 
 # Crear directorio de trabajo
 WORKDIR /app
-
-# Instalar concurrently globalmente para ejecutar ambos procesos
-RUN npm install -g concurrently
 
 # Copiar package.json del frontend
 COPY package*.json ./
@@ -26,8 +23,21 @@ WORKDIR /app
 # Copiar todo el código fuente
 COPY . .
 
-# Exponer puertos (3001 para backend, 5173 para frontend)
-EXPOSE 3001 5173
+# Construir el frontend para producción
+RUN npm run build
 
-# Comando para ejecutar ambos servicios
-CMD ["concurrently", "--kill-others", "--prefix", "[{name}]", "--names", "BACKEND,FRONTEND", "cd server && npm run dev", "npm run dev -- --host 0.0.0.0"]
+# Compilar el backend TypeScript
+WORKDIR /app/server
+RUN npm run build
+
+# Volver al directorio raíz
+WORKDIR /app
+
+# Usar el puerto dinámico de Cloud Run
+ENV PORT=8080
+
+# Exponer el puerto dinámico
+EXPOSE $PORT
+
+# Comando para ejecutar solo el backend (que servirá también el frontend)
+CMD ["node", "server/dist/index.js"]
