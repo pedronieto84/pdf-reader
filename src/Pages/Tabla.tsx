@@ -128,9 +128,16 @@ const Tabla: React.FC = () => {
   };
 
   return (
-    <div className="mt-4">
-      <div className="row">
-        <div className="col-12">
+    <div className="mt-4" style={{
+      width: "100%",
+      maxWidth: "calc(100vw - 30px)",
+      overflowX: "hidden",
+      boxSizing: "border-box",
+      margin: "0 auto",
+      paddingRight: "10px"
+    }}>
+      <div className="row" style={{ margin: 0 }}>
+        <div className="col-12" style={{ padding: "0" }}>
           <h2 className="mb-4">Tabla de Relación de Bienes</h2>
 
           {/* Selectores */}
@@ -228,7 +235,12 @@ const Tabla: React.FC = () => {
 
           {/* Tabla */}
           {tableData && (
-            <div className="card">
+            <div className="card" style={{
+              width: "100%",
+              maxWidth: "100%",
+              overflow: "hidden",
+              margin: "0"
+            }}>
               <div className="card-header">
                 <h5 className="card-title mb-0">
                   {tableData.fileName} - {tableData.extractionMethod}
@@ -241,9 +253,21 @@ const Tabla: React.FC = () => {
               <div className="card-body p-0">
                 <div
                   className="table-responsive"
-                  style={{ maxHeight: "70vh", overflowY: "auto" }}
+                  style={{
+                    maxHeight: "70vh",
+                    overflowY: "auto",
+                    overflowX: "auto",
+                    width: "100%",
+                    maxWidth: "100%",
+                    margin: 0,
+                    padding: 0
+                  }}
                 >
-                  <table className="table table-striped table-hover mb-0">
+                  <table className="table table-striped table-hover mb-0" style={{
+                    minWidth: "max-content",
+                    width: "auto",
+                    margin: 0
+                  }}>
                     <thead className="table-dark sticky-top">
                       <tr>
                         {tableData.table.headers.map((header) => (
@@ -251,7 +275,12 @@ const Tabla: React.FC = () => {
                             key={header}
                             scope="col"
                             className="text-nowrap user-select-none"
-                            style={{ cursor: "pointer", minWidth: "120px" }}
+                            style={{
+                              cursor: "pointer",
+                              minWidth: "100px",
+                              maxWidth: "200px",
+                              borderRight: "1px solid #495057"
+                            }}
                             onClick={() => handleSort(header)}
                           >
                             {header}
@@ -265,7 +294,12 @@ const Tabla: React.FC = () => {
                         processedData.map((row, index) => (
                           <tr key={index}>
                             {tableData.table.headers.map((header) => (
-                              <td key={header} className="text-nowrap">
+                              <td key={header} className="text-nowrap" style={{
+                                maxWidth: "200px",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                borderRight: "1px solid #dee2e6"
+                              }}>
                                 {row[header] || "-"}
                               </td>
                             ))}
@@ -276,6 +310,7 @@ const Tabla: React.FC = () => {
                           <td
                             colSpan={tableData.table.headers.length}
                             className="text-center py-4 text-muted"
+                            style={{ borderRight: "none" }}
                           >
                             {filter
                               ? "No se encontraron resultados para el filtro aplicado"
