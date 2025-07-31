@@ -75,6 +75,13 @@ const TablaCompleta: React.FC = () => {
 
     useEffect(() => {
         console.log('useEffect triggered with:', { selectedWhich, selectedTable });
+
+        // Resetear datos cuando cambian los parámetros
+        setTableData(null);
+        setError(null);
+        setFilter(""); // Limpiar filtro también
+        setSortConfig(null); // Resetear ordenación
+
         try {
             fetchTableData();
         } catch (err) {
@@ -225,7 +232,7 @@ const TablaCompleta: React.FC = () => {
                                         value={selectedWhich}
                                         onChange={(e) => setSelectedWhich(e.target.value)}
                                     >
-                                        <option value="sant-boi">Sant Boi de Lluçanès</option>
+                                        <option value="sant-boi-de-llucanes">Sant Boi de Lluçanès</option>
                                         <option value="collbato">Collbató</option>
                                         <option value="premia-de-dalt">Premia de Dalt</option>
                                     </select>
@@ -487,6 +494,31 @@ const TablaCompleta: React.FC = () => {
                                 </div>
                             </div>
                         </div>
+                    ) : !tableData && !error ? (
+                        <div className="card" style={{
+                            backgroundColor: "#e8f5e8",
+                            borderRadius: "12px",
+                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                            border: "1px solid #4caf50"
+                        }}>
+                            <div className="card-body text-center">
+                                <div className="spinner-grow text-success mb-3" role="status">
+                                    <span className="visually-hidden">Preparando...</span>
+                                </div>
+                                <h5>🔄 Preparando datos del municipio...</h5>
+                                <p className="text-muted">
+                                    Configurando parámetros para <strong>{selectedWhich}</strong><br />
+                                    Iniciando carga del PDF completo...
+                                </p>
+                                <div className="progress" style={{ height: "6px" }}>
+                                    <div
+                                        className="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                                        role="progressbar"
+                                        style={{ width: "100%" }}
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
                     ) : (
                         <div className="card" style={{
                             backgroundColor: "#fff3e0",
@@ -495,7 +527,7 @@ const TablaCompleta: React.FC = () => {
                             border: "1px solid #ffcc02"
                         }}>
                             <div className="card-body text-center">
-                                <h5>🚧 Boilerplate Activo 🚧</h5>
+                                <h5>🚧 Selecciona un municipio para comenzar 🚧</h5>
                                 <p><strong>Endpoint:</strong> /extract-full-pdf-table</p>
                                 <p><strong>Parámetros:</strong> which={selectedWhich}, table={selectedTable}</p>
                                 <p><strong>Estado:</strong> {error ? 'Error' : 'Esperando datos'}</p>

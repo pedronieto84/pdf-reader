@@ -354,8 +354,8 @@ app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
     console.log(`Municipio: ${which}`);
     console.log(`Tipo de tabla: ${table}`);
 
-    // Validar parámetros
-    const validWhich = ["sant-boi", "collbato", "premia-de-dalt"];
+    // Validar parámetros - aceptar ambos formatos
+    const validWhich = ["sant-boi", "sant-boi-de-llucanes", "collbato", "premia-de-dalt"];
     const validTable = ["LlibreA", "relacio-bens"];
 
     if (!validWhich.includes(which)) {
@@ -380,9 +380,9 @@ app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
 
     // Nuevo patrón de rutas: "../src/assets/documentos-parseo/{which}/{which}_{table}.pdf"
     const municipioMap: { [key: string]: string } = {
-      "sant-boi": "sant_boi_de_llucanes",
-      "collbato": "collbato", 
-      "premia-de-dalt": "premia_de_dalt"
+      "sant-boi-de-llucanes": "sant-boi-de-llucanes", // Aceptar ambos formatos
+      "collbato": "collbato",
+      "premia-de-dalt": "premia-de-dalt"
     };
 
     const tableMap: { [key: string]: string } = {
@@ -392,7 +392,7 @@ app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
 
     const municipioFolder = municipioMap[which];
     const tableType = tableMap[table];
-    
+
     if (!municipioFolder || !tableType) {
       return res.status(400).json({
         error: 'Configuración de municipio o tabla no encontrada',
