@@ -31,6 +31,7 @@ const TablaCompleta: React.FC = () => {
     const [selectedTable, setSelectedTable] = useState("relacio-bens"); // Nuevo estado para el tipo de tabla
     const [tableData, setTableData] = useState<TableResponse | null>(null);
     const [loading, setLoading] = useState(false);
+    const [preparing, setPreparing] = useState(false); // Nuevo estado para evitar colapso
     const [error, setError] = useState<string | null>(null);
     const [filter, setFilter] = useState("");
     const [sortConfig, setSortConfig] = useState<{
@@ -76,18 +77,31 @@ const TablaCompleta: React.FC = () => {
     useEffect(() => {
         console.log('useEffect triggered with:', { selectedWhich, selectedTable });
 
+        // Marcar como preparando para evitar colapso visual
+        setPreparing(true);
+        
         // Resetear datos cuando cambian los parámetros
         setTableData(null);
         setError(null);
         setFilter(""); // Limpiar filtro también
         setSortConfig(null); // Resetear ordenación
 
-        try {
-            fetchTableData();
-        } catch (err) {
-            console.error('Error in useEffect:', err);
-            setError('Error initializing component');
-        }
+        // Usar setTimeout para permitir que el estado de preparación se renderice
+        const timeoutId = setTimeout(() => {
+            setPreparing(false);
+            try {
+                fetchTableData();
+            } catch (err) {
+                console.error('Error in useEffect:', err);
+                setError('Error initializing component');
+                setPreparing(false);
+            }
+        }, 100); // Breve delay para evitar colapso
+
+        // Cleanup timeout si el componente se desmonta o cambian los parámetros
+        return () => {
+            clearTimeout(timeoutId);
+        };
     }, [selectedWhich, selectedTable]);
 
     // Filtrar y ordenar datos
@@ -207,7 +221,8 @@ const TablaCompleta: React.FC = () => {
             backgroundColor: "#f8f9fa",
             borderRadius: "8px",
             boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-            padding: "20px"
+            padding: "20px",
+            minHeight: "80vh" // Añadir altura mínima al contenedor principal
         }}>
             <div className="row" style={{ margin: 0 }}>
                 <div className="col-12" style={{ padding: "0" }}>
@@ -320,7 +335,13 @@ const TablaCompleta: React.FC = () => {
                     )}
 
                     {/* Tabla */}
-                    {tableData && tableData.table && tableData.table.headers ? (
+                    <div style={{ 
+                        minHeight: "600px", 
+                        display: "flex", 
+                        flexDirection: "column",
+                        justifyContent: "flex-start" 
+                    }}> {/* Contenedor con altura mínima */}
+                        {tableData && tableData.table && tableData.table.headers ? (
                         <div className="card" style={{
                             width: "100%",
                             maxWidth: "100%",
@@ -469,50 +490,58 @@ const TablaCompleta: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                    ) : loading ? (
+                    ) : preparing ? (
                         <div className="card" style={{
-                            backgroundColor: "#fff3e0",
+                            backgroundColor: "#e8f5e8",
                             borderRadius: "12px",
                             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-                            border: "1px solid #ffcc02"
+                            border: "1px solid #4caf50",
+                            height: "600px", // Altura fija en lugar de mínima
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center"
                         }}>
                             <div className="card-body text-center">
-                                <div className="spinner-border text-primary mb-3" role="status">
-                                    <span className="visually-hidden">Cargando...</span>
+                                <div className="spinner-grow text-success mb-4" role="status" style={{ width: "3rem", height: "3rem" }}>
+                                    <span className="visually-hidden">Preparando...</span>
                                 </div>
-                                <h5>Procesando PDF completo...</h5>
-                                <p className="text-muted">
-                                    Extrayendo todas las páginas y construyendo tabla completa.<br />
-                                    Este proceso puede tomar unos momentos para documentos grandes.
+                                <h4>🔄 Preparando datos del municipio...</h4>
+                                <p className="text-muted fs-5">
+                                    Configurando parámetros para <strong>{selectedWhich}</strong><br />
+                                    Iniciando carga del PDF completo...
                                 </p>
-                                <div className="progress" style={{ height: "4px" }}>
+                                <div className="progress mt-4" style={{ height: "8px", width: "300px", margin: "0 auto" }}>
                                     <div
-                                        className="progress-bar progress-bar-striped progress-bar-animated"
+                                        className="progress-bar bg-success progress-bar-striped progress-bar-animated"
                                         role="progressbar"
                                         style={{ width: "100%" }}
                                     ></div>
                                 </div>
                             </div>
                         </div>
-                    ) : !tableData && !error ? (
+                    ) : loading ? (
                         <div className="card" style={{
-                            backgroundColor: "#e8f5e8",
+                            backgroundColor: "#fff3e0",
                             borderRadius: "12px",
                             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-                            border: "1px solid #4caf50"
+                            border: "1px solid #ffcc02",
+                            height: "600px", // Altura fija en lugar de mínima
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center"
                         }}>
                             <div className="card-body text-center">
-                                <div className="spinner-grow text-success mb-3" role="status">
-                                    <span className="visually-hidden">Preparando...</span>
+                                <div className="spinner-border text-primary mb-4" role="status" style={{ width: "3rem", height: "3rem" }}>
+                                    <span className="visually-hidden">Cargando...</span>
                                 </div>
-                                <h5>🔄 Preparando datos del municipio...</h5>
-                                <p className="text-muted">
-                                    Configurando parámetros para <strong>{selectedWhich}</strong><br />
-                                    Iniciando carga del PDF completo...
+                                <h4>⚙️ Procesando PDF completo...</h4>
+                                <p className="text-muted fs-5">
+                                    Extrayendo todas las páginas y construyendo tabla completa.<br />
+                                    Este proceso puede tomar unos momentos para documentos grandes.
                                 </p>
-                                <div className="progress" style={{ height: "6px" }}>
+                                <div className="progress mt-4" style={{ height: "8px", width: "300px", margin: "0 auto" }}>
                                     <div
-                                        className="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                                        className="progress-bar progress-bar-striped progress-bar-animated"
                                         role="progressbar"
                                         style={{ width: "100%" }}
                                     ></div>
@@ -524,16 +553,21 @@ const TablaCompleta: React.FC = () => {
                             backgroundColor: "#fff3e0",
                             borderRadius: "12px",
                             boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
-                            border: "1px solid #ffcc02"
+                            border: "1px solid #ffcc02",
+                            height: "600px", // Altura fija en lugar de mínima
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center"
                         }}>
                             <div className="card-body text-center">
-                                <h5>🚧 Selecciona un municipio para comenzar 🚧</h5>
-                                <p><strong>Endpoint:</strong> /extract-full-pdf-table</p>
-                                <p><strong>Parámetros:</strong> which={selectedWhich}, table={selectedTable}</p>
-                                <p><strong>Estado:</strong> {error ? 'Error' : 'Esperando datos'}</p>
+                                <h4>🚧 Selecciona un municipio para comenzar 🚧</h4>
+                                <p className="fs-5"><strong>Endpoint:</strong> /extract-full-pdf-table</p>
+                                <p className="fs-5"><strong>Parámetros:</strong> which={selectedWhich}, table={selectedTable}</p>
+                                <p className="fs-5"><strong>Estado:</strong> {error ? 'Error' : 'Esperando datos'}</p>
                             </div>
                         </div>
                     )}
+                    </div> {/* Cierre del contenedor con altura mínima */}
                 </div>
             </div>
         </div>
