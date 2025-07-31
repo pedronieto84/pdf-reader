@@ -344,6 +344,161 @@ app.get("/extract-table", async (req: Request, res: Response) => {
   }
 });
 
+// Nuevo endpoint para procesar TODAS las páginas de un PDF como tabla completa
+app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
+  try {
+    const which = (req.query.which as string) || "sant-boi"; // Municipio
+    const table = (req.query.table as string) || "relacio-bens"; // Tipo de tabla
+
+    console.log(`=== PROCESANDO PDF COMPLETO ===`);
+    console.log(`Municipio: ${which}`);
+    console.log(`Tipo de tabla: ${table}`);
+
+    // Validar parámetros
+    const validWhich = ["sant-boi", "premia"];
+    const validTable = ["LlibreA", "relacio-bens"];
+
+    if (!validWhich.includes(which)) {
+      return res.status(400).json({
+        error: 'Parámetro "which" inválido',
+        validOptions: validWhich,
+        received: which
+      });
+    }
+
+    if (!validTable.includes(table)) {
+      return res.status(400).json({
+        error: 'Parámetro "table" inválido',
+        validOptions: validTable,
+        received: table
+      });
+    }
+
+    // Construir ruta del archivo PDF completo
+    let pdfPath: string;
+    let fileName: string;
+
+    switch (which) {
+      case "sant-boi":
+        if (table === "relacio-bens") {
+          fileName = "sant-boi-de-llucanes_relacio-bens.pdf";
+          pdfPath = path.resolve("../src/assets/documentos-parseo/sant_boi_de_llucanes", fileName);
+        } else { // LlibreA
+          fileName = "sant-boi-de-llucanes_llibre-a.pdf";
+          pdfPath = path.resolve("../src/assets/documentos-parseo/sant_boi_de_llucanes", fileName);
+        }
+        break;
+      case "premia":
+        if (table === "relacio-bens") {
+          fileName = "premia-de-mar_relacio-bens.pdf";
+          pdfPath = path.resolve("../src/assets/documentos-parseo/premia_de_mar", fileName);
+        } else { // LlibreA
+          fileName = "premia-de-mar_llibre-a.pdf";
+          pdfPath = path.resolve("../src/assets/documentos-parseo/premia_de_mar", fileName);
+        }
+        break;
+      default:
+        return res.status(400).json({
+          error: 'Municipio no soportado',
+          validOptions: validWhich,
+          received: which
+        });
+    }
+
+    console.log(`Intentando cargar: ${pdfPath}`);
+
+    // Verificar que el archivo existe
+    if (!fs.existsSync(pdfPath)) {
+      return res.status(404).json({
+        error: `Archivo PDF completo no encontrado: ${fileName}`,
+        path: pdfPath,
+        suggestion: "Verificar que el archivo existe en documentos-parseo/"
+      });
+    }
+
+    // Usar pdf2json para procesar el PDF completo
+    const pdfParser = new PDFParser();
+
+    const parsePDF = new Promise<any>((resolve, reject) => {
+      pdfParser.on("pdfParser_dataError", (errData: any) => {
+        reject(new Error(errData.parserError));
+      });
+
+      pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+        resolve(pdfData);
+      });
+
+      pdfParser.loadPDF(pdfPath);
+    });
+
+    console.log("Iniciando parsing del PDF...");
+    const pdfData = await parsePDF;
+    const pages = pdfData.Pages || [];
+
+    console.log(`PDF cargado exitosamente. Total de páginas: ${pages.length}`);
+
+    // Procesar cada página con el parser de tabla
+    console.log("Procesando páginas individuales...");
+    const tablePagesData = pages.map((pageData: any, pageIndex: number) => {
+      const textElements = pageData.Texts || [];
+      const processedElements = textElements.map((text: any) => ({
+        x: text.x,
+        y: text.y,
+        width: text.w,
+        height: text.TS ? text.TS[0]?.TS || 0 : 0,
+        text: decodeURIComponent(text.R?.[0]?.T || ""),
+        fontFace: text.TS ? text.TS[0]?.TS || 0 : 0,
+      }));
+
+      console.log(`Página ${pageIndex + 1}: ${textElements.length} elementos de texto encontrados`);
+      return parseTableFromPdf2Json(processedElements, pageIndex + 1);
+    });
+
+    // Combinar todas las páginas en una sola tabla
+    console.log("Combinando todas las páginas...");
+    const combinedTable = combineTablePages(tablePagesData);
+
+    console.log("=== TABLA COMPLETA PROCESADA ===");
+    console.log(`Total de páginas procesadas: ${pages.length}`);
+    console.log(`Total de filas encontradas: ${combinedTable.metadata.totalRows}`);
+    console.log(`Total de columnas: ${combinedTable.metadata.totalColumns}`);
+    console.log(`Headers encontrados: ${combinedTable.headers.join(", ")}`);
+
+    // Mostrar estadísticas por página
+    tablePagesData.forEach((pageTable: any, index: number) => {
+      console.log(`Página ${index + 1}: ${pageTable.rows.length} filas, ${pageTable.headers.length} columnas`);
+    });
+
+    // Mostrar las primeras filas como ejemplo
+    console.log("--- Primeras 5 filas del resultado combinado ---");
+    combinedTable.rows.slice(0, 5).forEach((row, index) => {
+      console.log(`Fila ${index + 1}:`, row);
+    });
+    console.log("===================================");
+
+    // Respuesta en el mismo formato que extract-table
+    res.json({
+      fileName: fileName,
+      which: which,
+      tableType: table,
+      extractionMethod: "pdf2json + table parser (full PDF)",
+      table: combinedTable,
+      rawPages: tablePagesData, // incluir datos de páginas individuales para debugging
+      totalPages: pages.length,
+      source: "documentos-parseo",
+      processingTime: new Date().toISOString()
+    });
+
+  } catch (err: any) {
+    console.error("Error en extract-full-pdf-table:", err);
+    res.status(500).json({
+      error: "Error al procesar PDF completo",
+      details: err.message,
+      stack: err.stack
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`PDF Reader backend listening on port ${PORT}`);
 });

@@ -18,15 +18,17 @@ interface TableData {
 interface TableResponse {
     fileName: string;
     which: string;
-    page: string;
+    tableType: string; // Cambio: de 'page' a 'tableType'
     extractionMethod: string;
     table: TableData;
     source: string;
+    totalPages?: number; // Nueva propiedad opcional
+    processingTime?: string; // Nueva propiedad opcional
 }
 
 const TablaCompleta: React.FC = () => {
     const [selectedWhich, setSelectedWhich] = useState("sant-boi");
-    const [selectedPage, setSelectedPage] = useState("05");
+    const [selectedTable, setSelectedTable] = useState("relacio-bens"); // Nuevo estado para el tipo de tabla
     const [tableData, setTableData] = useState<TableResponse | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -36,70 +38,130 @@ const TablaCompleta: React.FC = () => {
         direction: "asc" | "desc";
     } | null>(null);
 
-    const pages = Array.from({ length: 40 }, (_, i) => {
-        const pageNum = i + 1;
-        return pageNum.toString().padStart(2, "0");
-    });
+    // Eliminar el array de páginas ya que cargaremos todas automáticamente
 
     const fetchTableData = async () => {
-        if (!selectedWhich || !selectedPage) return;
+        console.log('fetchTableData called with:', { selectedWhich, selectedTable });
+
+        if (!selectedWhich || !selectedTable) {
+            console.log('Missing parameters, aborting fetch');
+            return;
+        }
 
         setLoading(true);
         setError(null);
 
         try {
-            const response = await fetch(
-                `http://localhost:3001/extract-table?which=${selectedWhich}&page=${selectedPage}`
-            );
+            const url = `http://localhost:3001/extract-full-pdf-table?which=${selectedWhich}&table=${selectedTable}`;
+            console.log('Fetching from URL:', url);
+
+            const response = await fetch(url);
+            console.log('Response status:', response.status);
 
             if (!response.ok) {
                 throw new Error(`Error ${response.status}: ${response.statusText}`);
             }
 
             const data: TableResponse = await response.json();
+            console.log('Data received:', data);
             setTableData(data);
         } catch (err) {
+            console.error('Error in fetchTableData:', err);
             setError(err instanceof Error ? err.message : "Error desconocido");
-            console.error("Error fetching table data:", err);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchTableData();
-    }, [selectedWhich, selectedPage]);
+        console.log('useEffect triggered with:', { selectedWhich, selectedTable });
+        try {
+            fetchTableData();
+        } catch (err) {
+            console.error('Error in useEffect:', err);
+            setError('Error initializing component');
+        }
+    }, [selectedWhich, selectedTable]);
 
     // Filtrar y ordenar datos
     const processedData = useMemo(() => {
-        if (!tableData?.table.rows) return [];
+        try {
+            console.log('Processing data, tableData:', tableData);
 
-        let filteredRows = tableData.table.rows.filter((row) => {
-            if (!filter) return true;
+            if (!tableData?.table?.rows) {
+                console.log('No table data or rows available');
+                return [];
+            }
 
-            return Object.values(row).some((value) =>
-                value?.toLowerCase().includes(filter.toLowerCase())
-            );
-        });
+            let filteredRows = tableData.table.rows.filter((row) => {
+                if (!filter) return true;
 
-        // Aplicar ordenamiento
-        if (sortConfig) {
-            filteredRows.sort((a, b) => {
-                const aValue = a[sortConfig.key] || "";
-                const bValue = b[sortConfig.key] || "";
-
-                if (aValue < bValue) {
-                    return sortConfig.direction === "asc" ? -1 : 1;
-                }
-                if (aValue > bValue) {
-                    return sortConfig.direction === "asc" ? 1 : -1;
-                }
-                return 0;
+                return Object.values(row).some((value) =>
+                    value?.toLowerCase().includes(filter.toLowerCase())
+                );
             });
+
+            // Aplicar ordenamiento
+            if (sortConfig) {
+                filteredRows.sort((a, b) => {
+                    const aValue = a[sortConfig.key] || "";
+                    const bValue = b[sortConfig.key] || "";
+
+                    if (aValue < bValue) {
+                        return sortConfig.direction === "asc" ? -1 : 1;
+                    }
+                    if (aValue > bValue) {
+                        return sortConfig.direction === "asc" ? 1 : -1;
+                    }
+                    return 0;
+                });
+            }
+
+            console.log('Processed rows:', filteredRows.length);
+            return filteredRows;
+        } catch (err) {
+            console.error('Error processing data:', err);
+            return [];
+        }
+    }, [tableData, filter, sortConfig]);
+
+    // Calcular totales para las columnas numéricas
+    const totalsData = useMemo(() => {
+        if (!tableData?.table?.rows || tableData.table.rows.length === 0) {
+            return null;
         }
 
-        return filteredRows;
-    }, [tableData, filter, sortConfig]);
+        const numericColumns = [
+            "QUANT", "V.B.C.", "F.A.", "F.P.", "V.C.", "DOT. AMORT",
+            "V. MERCAT", "V. ASSEGURAN", "V.R.U."
+        ];
+
+        const totals = numericColumns.reduce((acc, column) => {
+            const total = processedData.reduce((sum, row) => {
+                const value = row[column];
+                if (value && typeof value === 'string') {
+                    // Remover separadores de miles y convertir comas por puntos
+                    const cleanValue = value.replace(/\./g, '').replace(',', '.');
+                    const numValue = parseFloat(cleanValue);
+                    return !isNaN(numValue) ? sum + numValue : sum;
+                }
+                return sum;
+            }, 0);
+
+            acc[column] = total.toLocaleString('es-ES', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+            return acc;
+        }, {} as Record<string, string>);
+
+        // Agregar etiqueta para la primera columna
+        if (tableData.table.headers.length > 0) {
+            totals[tableData.table.headers[0]] = "🧮 TOTALES";
+        }
+
+        return totals;
+    }, [processedData, tableData]);
 
     const handleSort = (key: string) => {
         let direction: "asc" | "desc" = "asc";
@@ -155,7 +217,7 @@ const TablaCompleta: React.FC = () => {
                             <div className="row g-3">
                                 <div className="col-md-4">
                                     <label htmlFor="which-select" className="form-label">
-                                        Seleccionar documento:
+                                        Seleccionar municipio:
                                     </label>
                                     <select
                                         id="which-select"
@@ -169,36 +231,33 @@ const TablaCompleta: React.FC = () => {
                                 </div>
 
                                 <div className="col-md-4">
-                                    <label htmlFor="page-select" className="form-label">
-                                        Seleccionar página:
+                                    <label htmlFor="table-select" className="form-label">
+                                        Seleccionar tipo de tabla:
                                     </label>
                                     <select
-                                        id="page-select"
+                                        id="table-select"
                                         className="form-select"
-                                        value={selectedPage}
-                                        onChange={(e) => setSelectedPage(e.target.value)}
+                                        value={selectedTable}
+                                        onChange={(e) => setSelectedTable(e.target.value)}
                                     >
-                                        {pages.map((page) => (
-                                            <option key={page} value={page}>
-                                                Página {page}
-                                            </option>
-                                        ))}
+                                        <option value="relacio-bens">Relación de Bienes</option>
+                                        <option value="LlibreA">Llibre A</option>
                                     </select>
                                 </div>
 
                                 <div className="col-md-4 d-flex align-items-end">
                                     <button
-                                        className="btn btn-primary"
+                                        className="btn btn-success"
                                         onClick={fetchTableData}
                                         disabled={loading}
                                     >
                                         {loading ? (
                                             <>
                                                 <span className="spinner-border spinner-border-sm me-2" />
-                                                Cargando...
+                                                Cargando todas las páginas...
                                             </>
                                         ) : (
-                                            "Procesar"
+                                            "Cargar PDF Completo"
                                         )}
                                     </button>
                                 </div>
@@ -253,7 +312,7 @@ const TablaCompleta: React.FC = () => {
                     )}
 
                     {/* Tabla */}
-                    {tableData && (
+                    {tableData && tableData.table && tableData.table.headers ? (
                         <div className="card" style={{
                             width: "100%",
                             maxWidth: "100%",
@@ -269,19 +328,35 @@ const TablaCompleta: React.FC = () => {
                                 borderBottom: "1px solid #ffcc02",
                                 borderRadius: "12px 12px 0 0"
                             }}>
-                                <h5 className="card-title mb-0">
-                                    {tableData.fileName} - {tableData.extractionMethod}
-                                </h5>
-                                <small className="text-muted">
-                                    Fuente: {tableData.source} | Total columnas:{" "}
-                                    {tableData.table.metadata.totalColumns}
-                                </small>
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 className="card-title mb-0">
+                                            📊 {tableData.fileName || 'PDF'} - Tabla Completa
+                                        </h5>
+                                        <small className="text-muted">
+                                            {tableData.extractionMethod || 'Extracción'} |
+                                            Fuente: {tableData.source || 'N/A'}
+                                        </small>
+                                    </div>
+                                    <div className="text-end">
+                                        <div className="badge bg-primary fs-6">
+                                            {tableData.totalPages || 'N/A'} páginas
+                                        </div>
+                                        <div className="badge bg-success fs-6 ms-2">
+                                            {tableData.table.metadata?.totalRows || 0} filas
+                                        </div>
+                                        <div className="badge bg-info fs-6 ms-2">
+                                            {tableData.table.metadata?.totalColumns || tableData.table.headers.length} columnas
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                             <div className="card-body p-0">
                                 <div
                                     className="table-responsive"
                                     style={{
-                                        maxHeight: "70vh",
+                                        maxHeight: "75vh", // Aumentar altura para más filas
+                                        minHeight: "400px", // Altura mínima
                                         overflowY: "auto",
                                         overflowX: "auto",
                                         width: "100%",
@@ -289,13 +364,18 @@ const TablaCompleta: React.FC = () => {
                                         margin: 0,
                                         padding: 0,
                                         backgroundColor: "#ffffff",
-                                        borderRadius: "0 0 12px 12px"
+                                        borderRadius: "0 0 12px 12px",
+                                        // Mejorar el scroll en navegadores webkit
+                                        scrollbarWidth: "thin",
+                                        scrollbarColor: "#6c757d #e9ecef"
                                     }}
                                 >
                                     <table className="table table-striped table-hover mb-0" style={{
                                         minWidth: "max-content",
                                         width: "auto",
-                                        margin: 0
+                                        margin: 0,
+                                        // Optimización para tablas grandes
+                                        tableLayout: "auto"
                                     }}>
                                         <thead className="table-dark sticky-top">
                                             <tr>
@@ -319,6 +399,35 @@ const TablaCompleta: React.FC = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            {/* Fila de totales */}
+                                            {totalsData && (
+                                                <tr style={{
+                                                    backgroundColor: "#e3f2fd",
+                                                    fontWeight: "bold",
+                                                    borderBottom: "2px solid #2196f3",
+                                                    position: "sticky",
+                                                    top: "56px", // Aumentar para que no tape la primera fila
+                                                    zIndex: 9 // Reducir z-index para que esté debajo del header
+                                                }}>
+                                                    {tableData.table.headers.map((header) => (
+                                                        <td key={`total-${header}`} className="text-nowrap" style={{
+                                                            maxWidth: "200px",
+                                                            overflow: "hidden",
+                                                            textOverflow: "ellipsis",
+                                                            borderRight: "1px solid #2196f3",
+                                                            backgroundColor: "#e3f2fd",
+                                                            color: "#1976d2",
+                                                            fontWeight: "600",
+                                                            fontSize: "0.9em",
+                                                            padding: "8px 12px"
+                                                        }}>
+                                                            {totalsData[header] || "-"}
+                                                        </td>
+                                                    ))}
+                                                </tr>
+                                            )}
+
+                                            {/* Filas de datos */}
                                             {processedData.length > 0 ? (
                                                 processedData.map((row, index) => (
                                                     <tr key={index}>
@@ -350,6 +459,45 @@ const TablaCompleta: React.FC = () => {
                                         </tbody>
                                     </table>
                                 </div>
+                            </div>
+                        </div>
+                    ) : loading ? (
+                        <div className="card" style={{
+                            backgroundColor: "#fff3e0",
+                            borderRadius: "12px",
+                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                            border: "1px solid #ffcc02"
+                        }}>
+                            <div className="card-body text-center">
+                                <div className="spinner-border text-primary mb-3" role="status">
+                                    <span className="visually-hidden">Cargando...</span>
+                                </div>
+                                <h5>Procesando PDF completo...</h5>
+                                <p className="text-muted">
+                                    Extrayendo todas las páginas y construyendo tabla completa.<br />
+                                    Este proceso puede tomar unos momentos para documentos grandes.
+                                </p>
+                                <div className="progress" style={{ height: "4px" }}>
+                                    <div
+                                        className="progress-bar progress-bar-striped progress-bar-animated"
+                                        role="progressbar"
+                                        style={{ width: "100%" }}
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="card" style={{
+                            backgroundColor: "#fff3e0",
+                            borderRadius: "12px",
+                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+                            border: "1px solid #ffcc02"
+                        }}>
+                            <div className="card-body text-center">
+                                <h5>🚧 Boilerplate Activo 🚧</h5>
+                                <p><strong>Endpoint:</strong> /extract-full-pdf-table</p>
+                                <p><strong>Parámetros:</strong> which={selectedWhich}, table={selectedTable}</p>
+                                <p><strong>Estado:</strong> {error ? 'Error' : 'Esperando datos'}</p>
                             </div>
                         </div>
                     )}
