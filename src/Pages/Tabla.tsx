@@ -134,14 +134,23 @@ const Tabla: React.FC = () => {
       overflowX: "hidden",
       boxSizing: "border-box",
       margin: "0 auto",
-      paddingRight: "10px"
+      paddingRight: "10px",
+      backgroundColor: "#f8f9fa",
+      borderRadius: "8px",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      padding: "20px"
     }}>
       <div className="row" style={{ margin: 0 }}>
         <div className="col-12" style={{ padding: "0" }}>
           <h2 className="mb-4">Tabla de Relación de Bienes</h2>
 
           {/* Selectores */}
-          <div className="card mb-4">
+          <div className="card mb-4" style={{
+            backgroundColor: "#e3f2fd",
+            borderRadius: "10px",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+            border: "1px solid #bbdefb"
+          }}>
             <div className="card-body">
               <div className="row g-3">
                 <div className="col-md-4">
@@ -199,7 +208,12 @@ const Tabla: React.FC = () => {
 
           {/* Filtro */}
           {tableData && (
-            <div className="card mb-4">
+            <div className="card mb-4" style={{
+              backgroundColor: "#f3e5f5",
+              borderRadius: "10px",
+              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
+              border: "1px solid #e1bee7"
+            }}>
               <div className="card-body">
                 <div className="row">
                   <div className="col-md-6">
@@ -228,7 +242,12 @@ const Tabla: React.FC = () => {
 
           {/* Error */}
           {error && (
-            <div className="alert alert-danger" role="alert">
+            <div className="alert alert-danger" role="alert" style={{
+              backgroundColor: "#ffebee",
+              borderRadius: "10px",
+              boxShadow: "0 2px 8px rgba(244, 67, 54, 0.2)",
+              border: "1px solid #ffcdd2"
+            }}>
               <strong>Error:</strong> {error}
             </div>
           )}
@@ -239,9 +258,17 @@ const Tabla: React.FC = () => {
               width: "100%",
               maxWidth: "100%",
               overflow: "hidden",
-              margin: "0"
+              margin: "0",
+              backgroundColor: "#fff3e0",
+              borderRadius: "12px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+              border: "1px solid #ffcc02"
             }}>
-              <div className="card-header">
+              <div className="card-header" style={{
+                backgroundColor: "#ffecb3",
+                borderBottom: "1px solid #ffcc02",
+                borderRadius: "12px 12px 0 0"
+              }}>
                 <h5 className="card-title mb-0">
                   {tableData.fileName} - {tableData.extractionMethod}
                 </h5>
@@ -260,7 +287,9 @@ const Tabla: React.FC = () => {
                     width: "100%",
                     maxWidth: "100%",
                     margin: 0,
-                    padding: 0
+                    padding: 0,
+                    backgroundColor: "#ffffff",
+                    borderRadius: "0 0 12px 12px"
                   }}
                 >
                   <table className="table table-striped table-hover mb-0" style={{
