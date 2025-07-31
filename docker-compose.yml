@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  pdf-reader:
+    build: .
+    ports:
+      - "3001:3001"  # Backend
+      - "5173:5173"  # Frontend
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/server/node_modules
+    environment:
+      - NODE_ENV=development
+    stdin_open: true
+    tty: true
