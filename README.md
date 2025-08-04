@@ -86,7 +86,8 @@ pdf-reader/
 ├── server/                       # Backend Express/TypeScript
 │   ├── src/
 │   │   ├── index.ts            # Servidor principal
-│   │   ├── tableParserNew.ts   # Parser de tablas PDF
+│   │   ├── tableParserNew.ts   # Parser para Relació de Bienes
+│   │   ├── tableParserLlibreA.ts # Parser para Llibre A
 │   │   └── ...
 │   └── package.json
 ├── package.json                 # Dependencias del frontend
@@ -103,9 +104,17 @@ Extrae y procesa una tabla completa de un documento PDF.
 - `which`: Municipio (`sant-boi-de-llucanes`, `collbato`, `premia-de-dalt`)
 - `table`: Tipo de tabla (`relacio-bens`, `LlibreA`)
 
-**Ejemplo:**
+**Tipos de Tabla:**
+- `relacio-bens`: Relació de Bienes (estructura con clasificación, quantitat, valores, etc.)
+- `LlibreA`: Llibre A (estructura con inventari, secció, descripció, etc.)
+
+**Ejemplos:**
 ```
+# Relació de Bienes
 GET http://localhost:3001/extract-full-pdf-table?which=sant-boi-de-llucanes&table=relacio-bens
+
+# Llibre A
+GET http://localhost:3001/extract-full-pdf-table?which=collbato&table=LlibreA
 ```
 
 ## 📊 Funcionalidades de la Interfaz

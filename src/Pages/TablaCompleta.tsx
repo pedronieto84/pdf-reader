@@ -157,10 +157,11 @@ const TablaCompleta: React.FC = () => {
             return null;
         }
 
-        const numericColumns = [
-            "QUANT", "V.B.C.", "F.A.", "F.P.", "V.C.", "DOT. AMORT",
-            "V. MERCAT", "V. ASSEGURAN", "V.R.U."
-        ];
+        // Definir columnas numéricas según el tipo de tabla
+        const numericColumns = selectedTable === "LlibreA"
+            ? ["QUANTITAT", "PREU UNITARI", "VALOR TOTAL"]
+            : ["QUANT", "V.B.C.", "F.A.", "F.P.", "V.C.", "DOT. AMORT",
+                "V. MERCAT", "V. ASSEGURAN", "V.R.U."];
 
         const totals = numericColumns.reduce((acc, column) => {
             const total = processedData.reduce((sum, row) => {
@@ -181,13 +182,16 @@ const TablaCompleta: React.FC = () => {
             return acc;
         }, {} as Record<string, string>);
 
-        // Agregar etiqueta para la primera columna
+        // Agregar etiqueta para la primera columna según el tipo de tabla
         if (tableData.table.headers.length > 0) {
-            totals[tableData.table.headers[0]] = "🧮 TOTALES";
+            const firstColumnKey = tableData.table.headers[0];
+            totals[firstColumnKey] = selectedTable === "LlibreA"
+                ? "🧮 TOTALES"
+                : "🧮 TOTALES";
         }
 
         return totals;
-    }, [processedData, tableData]);
+    }, [processedData, tableData, selectedTable]);
 
     const handleSort = (key: string) => {
         let direction: "asc" | "desc" = "asc";
@@ -306,7 +310,11 @@ const TablaCompleta: React.FC = () => {
         }}>
             <div className="row" style={{ margin: 0 }}>
                 <div className="col-12" style={{ padding: "0" }}>
-                    <h2 className="mb-4">Tabla Completa de Relación de Bienes</h2>
+                    <h2 className="mb-4">
+                        {selectedTable === "LlibreA"
+                            ? "Tabla Completa - Llibre A"
+                            : "Tabla Completa - Relació de Bienes"}
+                    </h2>
 
                     {/* Selectores */}
                     <div className="card mb-4" style={{
@@ -450,11 +458,12 @@ const TablaCompleta: React.FC = () => {
                                     <div className="d-flex justify-content-between align-items-center">
                                         <div>
                                             <h5 className="card-title mb-0">
-                                                📊 {tableData.fileName || 'PDF'} - Tabla Completa
+                                                📊 {tableData.fileName || 'PDF'} - {selectedTable === "LlibreA" ? "Llibre A" : "Relació de Bienes"}
                                             </h5>
                                             <small className="text-muted">
                                                 {tableData.extractionMethod || 'Extracción'} |
-                                                Fuente: {tableData.source || 'N/A'}
+                                                Fuente: {tableData.source || 'N/A'} |
+                                                Tipo: {selectedTable === "LlibreA" ? "Llibre A" : "Relació de Bienes"}
                                             </small>
                                         </div>
                                         <div className="text-end">

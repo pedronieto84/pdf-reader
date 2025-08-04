@@ -5,6 +5,7 @@ const pdfParse = require("pdf-parse");
 import path from "path";
 import PDFParser from "pdf2json";
 import { parseTableFromPdf2Json, combineTablePages } from "./tableParserNew";
+import { parseTableFromPdf2JsonLlibreA, combineTablePagesLlibreA } from "./tableParserLlibreA";
 
 const app = express();
 const PORT = 3001;
@@ -387,7 +388,7 @@ app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
 
     const tableMap: { [key: string]: string } = {
       "relacio-bens": "relacio-bens",
-      "LlibreA": "llibre-a"
+      "LlibreA": "llibreA"
     };
 
     const municipioFolder = municipioMap[which];
@@ -436,7 +437,7 @@ app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
 
     console.log(`PDF cargado exitosamente. Total de páginas: ${pages.length}`);
 
-    // Procesar cada página con el parser de tabla
+    // Procesar cada página con el parser de tabla adecuado
     console.log("Procesando páginas individuales...");
     const tablePagesData = pages.map((pageData: any, pageIndex: number) => {
       const textElements = pageData.Texts || [];
@@ -450,12 +451,20 @@ app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
       }));
 
       console.log(`Página ${pageIndex + 1}: ${textElements.length} elementos de texto encontrados`);
-      return parseTableFromPdf2Json(processedElements, pageIndex + 1);
+
+      // Usar el parser correcto según el tipo de tabla
+      if (table === "LlibreA") {
+        return parseTableFromPdf2JsonLlibreA(processedElements, pageIndex + 1);
+      } else {
+        return parseTableFromPdf2Json(processedElements, pageIndex + 1);
+      }
     });
 
-    // Combinar todas las páginas en una sola tabla
+    // Combinar todas las páginas en una sola tabla usando la función correcta
     console.log("Combinando todas las páginas...");
-    const combinedTable = combineTablePages(tablePagesData);
+    const combinedTable = table === "LlibreA"
+      ? combineTablePagesLlibreA(tablePagesData)
+      : combineTablePages(tablePagesData);
 
     console.log("=== TABLA COMPLETA PROCESADA ===");
     console.log(`Total de páginas procesadas: ${pages.length}`);
