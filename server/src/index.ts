@@ -546,6 +546,130 @@ app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
   }
 });
 
+// Endpoint de prueba para extraer elementos en bruto del PDF
+app.get("/test", async (req: Request, res: Response) => {
+  try {
+    console.log("=== ENDPOINT TEST - ELEMENTOS EN BRUTO ===");
+
+    // Ruta fija al PDF de sant-boi-de-llucanes
+    const pdfPath = path.resolve("../src/assets/documentos-parseo/sant-boi-de-llucanes/sant-boi-de-llucanes_llibreA.pdf");
+    console.log("Intentando cargar:", pdfPath);
+
+    // Verificar que el archivo existe
+    if (!fs.existsSync(pdfPath)) {
+      return res.status(404).json({
+        error: "PDF no encontrado",
+        path: pdfPath
+      });
+    }
+
+    const pdfParser = new (PDFParser as any)(null, 1);
+
+    pdfParser.on("pdfParser_dataError", (errData: any) => {
+      console.error("Error en PDF Parser:", errData.parserError);
+      res.status(500).json({
+        error: "Error al procesar el PDF",
+        details: errData.parserError,
+      });
+    });
+
+    pdfParser.on("pdfParser_dataReady", (pdfData: any) => {
+      try {
+        console.log("PDF cargado exitosamente");
+        console.log("Total de páginas:", pdfData.Pages?.length || 0);
+
+        // Extraer elementos de todas las páginas
+        const allElements: any[] = [];
+        const pagesInfo: any[] = [];
+
+        if (pdfData.Pages && pdfData.Pages.length > 0) {
+          pdfData.Pages.forEach((page: any, pageIndex: number) => {
+            console.log(`Página ${pageIndex + 1}: ${page.Texts?.length || 0} elementos`);
+
+            const pageElements = page.Texts?.map((text: any, textIndex: number) => {
+              const decodedText = decodeURIComponent(text.R?.[0]?.T || "");
+              return {
+                page: pageIndex + 1,
+                textIndex: textIndex,
+                x: text.x || 0,
+                y: text.y || 0,
+                width: text.w || 0,
+                height: text.h || 0,
+                text: decodedText,
+                fontFace: text.R?.[0]?.TS?.[2] || 0,
+                fontSize: text.R?.[0]?.TS?.[0] || 0,
+                fontFlags: text.R?.[0]?.TS?.[3] || 0,
+                raw: text // Elemento completo sin procesar
+              };
+            }) || [];
+
+            allElements.push(...pageElements);
+
+            pagesInfo.push({
+              page: pageIndex + 1,
+              totalTexts: pageElements.length,
+              sampleElements: pageElements.slice(0, 5) // Primeros 5 elementos como muestra
+            });
+          });
+        }
+
+        console.log(`Total elementos extraídos: ${allElements.length}`);
+
+        // Devolver información completa en bruto
+        res.json({
+          status: "success",
+          fileName: "sant-boi-de-llucanes_llibreA.pdf",
+          filePath: pdfPath,
+          extractionMethod: "pdf2json raw elements",
+          totalPages: pdfData.Pages?.length || 0,
+          totalElements: allElements.length,
+
+          // Información por página
+          pagesInfo: pagesInfo,
+
+          // Todos los elementos (limitado a 100 para evitar respuestas demasiado grandes)
+          allElements: allElements.slice(0, 100),
+
+          // Muestra de elementos de la primera página para análisis
+          firstPageSample: allElements.filter(el => el.page === 1).slice(0, 20),
+
+          // Datos en bruto del PDF (estructura completa)
+          rawPdfData: {
+            meta: pdfData.Meta || {},
+            width: pdfData.Pages?.[0]?.Width || 0,
+            height: pdfData.Pages?.[0]?.Height || 0,
+            totalPages: pdfData.Pages?.length || 0
+          },
+
+          // Información adicional para debugging
+          debug: {
+            note: "Este endpoint devuelve los elementos en bruto de pdf2json sin procesamiento",
+            limitedTo: "Primeros 100 elementos para evitar respuestas demasiado grandes",
+            fullDataAvailable: allElements.length > 100 ? `${allElements.length - 100} elementos adicionales disponibles` : "Todos los elementos incluidos"
+          }
+        });
+
+      } catch (error: any) {
+        console.error("Error procesando datos del PDF:", error);
+        res.status(500).json({
+          error: "Error al procesar los datos del PDF",
+          details: error.message,
+        });
+      }
+    });
+
+    // Cargar el PDF
+    pdfParser.loadPDF(pdfPath);
+
+  } catch (error: any) {
+    console.error("Error en endpoint /test:", error);
+    res.status(500).json({
+      error: "Error interno del servidor",
+      details: error.message,
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`PDF Reader backend listening on port ${PORT}`);
 });

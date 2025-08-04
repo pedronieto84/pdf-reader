@@ -335,8 +335,10 @@ const TablaCompleta: React.FC = () => {
                                         value={selectedWhich}
                                         onChange={(e) => setSelectedWhich(e.target.value)}
                                     >
+                                        <option value="sant-boi">Sant Boi</option>
                                         <option value="sant-boi-de-llucanes">Sant Boi de Lluçanès</option>
                                         <option value="collbato">Collbató</option>
+                                        <option value="premia">Premia</option>
                                         <option value="premia-de-dalt">Premia de Dalt</option>
                                     </select>
                                 </div>

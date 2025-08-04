@@ -71,78 +71,78 @@ interface LlibreARow {
     };
 }
 
-// Definiciones de columnas para LlibreA (18 columnas)
+// Definiciones de columnas para LlibreA (18 columnas) - Basado en coordenadas reales de Python
 const LLIBRE_A_COLUMN_DEFINITIONS = [
     {
         name: "COL_1_ID",
-        xRange: { min: 0.5, max: 1.5 },
+        xRange: { min: 25, max: 35 }, // X= 27.8
         fields: ["ID"],
         type: "number"
     },
     {
         name: "COL_2_CLASSIFICACIO",
-        xRange: { min: 1.5, max: 3.0 },
+        xRange: { min: 60, max: 95 }, // X= 66.3
         fields: ["CLASSIFICACIÓ"],
         type: "number", // 6 dígitos
         validation: /^\d{6}$/
     },
     {
         name: "COL_3_N_BE",
-        xRange: { min: 3.0, max: 4.5 },
+        xRange: { min: 90, max: 135 }, // X= 93.8
         fields: ["N.BÉ"],
         type: "number"
     },
     {
         name: "COL_4_5_QUANT_DESCRIPCIO",
-        xRange: { min: 4.5, max: 8.0 },
+        xRange: { min: 130, max: 280 }, // X= 135.8
         fields: ["QUANT.", "DESCRIPCIÓ"],
         type: "vertical", // Columna vertical con 2 celdas
         stackOrder: ["QUANT.", "DESCRIPCIÓ"] // QUANT arriba, DESCRIPCIÓ abajo
     },
     {
         name: "COL_6_7_CGESTO_CCOST",
-        xRange: { min: 8.0, max: 9.5 },
+        xRange: { min: 280, max: 325 }, // X= 283.1
         fields: ["C.GESTO", "C.COST"],
         type: "vertical",
         stackOrder: ["C.GESTO", "C.COST"]
     },
     {
         name: "COL_8_T_ADQUISICIO",
-        xRange: { min: 9.5, max: 11.0 },
+        xRange: { min: 325, max: 415 }, // X= 327.8
         fields: ["T.ADQUISICIÓ"],
         type: "string"
     },
     {
         name: "COL_9_10_COSTADQUI_DALTA",
-        xRange: { min: 11.0, max: 13.0 },
+        xRange: { min: 415, max: 490 }, // X= 417.8
         fields: ["COST ADQUI.", "D-ALTA"],
         type: "vertical",
         stackOrder: ["COST ADQUI.", "D-ALTA"]
     },
     {
         name: "COL_11_12_CENTRE_UBICACIO",
-        xRange: { min: 13.0, max: 15.0 },
+        xRange: { min: 490, max: 540 }, // X= 492.4
         fields: ["CENTRE", "UBICACIÓ"],
         type: "vertical",
         stackOrder: ["CENTRE", "UBICACIÓ"]
     },
     {
         name: "COL_13_14_PLANTA_ESPAI",
-        xRange: { min: 15.0, max: 16.5 },
+        xRange: { min: 540, max: 600 }, // X= 542.3 y siguientes
         fields: ["PLANTA", "ESPAI"],
         type: "vertical",
         stackOrder: ["PLANTA", "ESPAI"]
     },
     {
         name: "COL_15_16_VBC_DOTAMORT",
-        xRange: { min: 16.5, max: 18.0 },
+        xRange: { min: 640, max: 740 }, // X= 685.9, 646.5, etc.
         fields: ["V.B.C", "DOT. AMORT"],
         type: "vertical",
         stackOrder: ["V.B.C", "DOT. AMORT"]
     },
     {
         name: "COL_17_18_FA_VC",
-        xRange: { min: 18.0, max: 20.0 },
+        xRange: { min: 740, max: 820 }, // X= 740.8, 808.3
         fields: ["F.A", "V.C."],
         type: "vertical",
         stackOrder: ["F.A", "V.C."]
