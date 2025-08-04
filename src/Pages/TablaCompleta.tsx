@@ -159,7 +159,7 @@ const TablaCompleta: React.FC = () => {
 
         // Definir columnas numéricas según el tipo de tabla
         const numericColumns = selectedTable === "LlibreA"
-            ? ["QUANTITAT", "PREU UNITARI", "VALOR TOTAL"]
+            ? ["QUANT.", "COST ADQUI.", "V.B.C", "DOT. AMORT", "F.A", "V.C."]
             : ["QUANT", "V.B.C.", "F.A.", "F.P.", "V.C.", "DOT. AMORT",
                 "V. MERCAT", "V. ASSEGURAN", "V.R.U."];
 

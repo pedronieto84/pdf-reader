@@ -265,10 +265,22 @@ app.get("/extract-table", async (req: Request, res: Response) => {
           pdfPath = path.resolve(`../src/assets/${fileName}`);
         }
         break;
+      case "collbato":
+        fileName = "collbato_llibreA.pdf";
+        pdfPath = path.resolve(`../src/assets/documentos-parseo/collbato/${fileName}`);
+        break;
+      case "sant-boi-de-llucanes":
+        fileName = "sant-boi-de-llucanes_llibreA.pdf";
+        pdfPath = path.resolve(`../src/assets/documentos-parseo/sant-boi-de-llucanes/${fileName}`);
+        break;
+      case "premia-de-dalt":
+        fileName = "premia-de-dalt_llibreA.pdf";
+        pdfPath = path.resolve(`../src/assets/documentos-parseo/premia-de-dalt/${fileName}`);
+        break;
       default:
         return res.status(400).json({
           error: 'Parámetro "which" inválido',
-          validOptions: ["sant-boi", "premia"],
+          validOptions: ["sant-boi", "premia", "collbato", "sant-boi-de-llucanes", "premia-de-dalt"],
         });
     }
 
@@ -437,34 +449,61 @@ app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
 
     console.log(`PDF cargado exitosamente. Total de páginas: ${pages.length}`);
 
-    // Procesar cada página con el parser de tabla adecuado
-    console.log("Procesando páginas individuales...");
-    const tablePagesData = pages.map((pageData: any, pageIndex: number) => {
-      const textElements = pageData.Texts || [];
-      const processedElements = textElements.map((text: any) => ({
-        x: text.x,
-        y: text.y,
-        width: text.w,
-        height: text.TS ? text.TS[0]?.TS || 0 : 0,
-        text: decodeURIComponent(text.R?.[0]?.T || ""),
-        fontFace: text.TS ? text.TS[0]?.TS || 0 : 0,
+    let combinedTable: any;
+    let tablePagesData: any[] = [];
+
+    if (table === "LlibreA") {
+      // Para LlibreA: procesar todo el documento como una unidad
+      console.log("Procesando documento LlibreA completo...");
+
+      // Recopilar todos los elementos de texto de todas las páginas
+      const allPageElements = pages.map((pageData: any, pageIndex: number) => {
+        const textElements = pageData.Texts || [];
+        return textElements.map((text: any) => ({
+          x: text.x,
+          y: text.y,
+          width: text.w,
+          height: text.TS ? text.TS[0]?.TS || 0 : 0,
+          text: decodeURIComponent(text.R?.[0]?.T || ""),
+          fontFace: text.TS ? text.TS[0]?.TS || 0 : 0,
+        }));
+      });
+
+      console.log(`Elementos de texto por página: ${allPageElements.map((els: any) => els.length).join(', ')}`);
+
+      // Usar el parser LlibreA que procesa todo el documento
+      combinedTable = parseTableFromPdf2JsonLlibreA(allPageElements, 1);
+
+      // Para compatibilidad, crear datos de páginas vacíos
+      tablePagesData = pages.map((_: any, index: number) => ({
+        headers: combinedTable.headers,
+        rows: [],
+        metadata: { totalRows: 0, totalColumns: combinedTable.headers.length, pageNumber: index + 1 }
       }));
 
-      console.log(`Página ${pageIndex + 1}: ${textElements.length} elementos de texto encontrados`);
+    } else {
+      // Para otros tipos: procesar página por página como antes
+      console.log("Procesando páginas individuales...");
+      tablePagesData = pages.map((pageData: any, pageIndex: number) => {
+        const textElements = pageData.Texts || [];
+        const processedElements = textElements.map((text: any) => ({
+          x: text.x,
+          y: text.y,
+          width: text.w,
+          height: text.TS ? text.TS[0]?.TS || 0 : 0,
+          text: decodeURIComponent(text.R?.[0]?.T || ""),
+          fontFace: text.TS ? text.TS[0]?.TS || 0 : 0,
+        }));
 
-      // Usar el parser correcto según el tipo de tabla
-      if (table === "LlibreA") {
-        return parseTableFromPdf2JsonLlibreA(processedElements, pageIndex + 1);
-      } else {
+        console.log(`Página ${pageIndex + 1}: ${textElements.length} elementos de texto encontrados`);
+
         return parseTableFromPdf2Json(processedElements, pageIndex + 1);
-      }
-    });
+      });
 
-    // Combinar todas las páginas en una sola tabla usando la función correcta
-    console.log("Combinando todas las páginas...");
-    const combinedTable = table === "LlibreA"
-      ? combineTablePagesLlibreA(tablePagesData)
-      : combineTablePages(tablePagesData);
+      // Combinar todas las páginas en una sola tabla
+      console.log("Combinando todas las páginas...");
+      combinedTable = combineTablePages(tablePagesData);
+    }
 
     console.log("=== TABLA COMPLETA PROCESADA ===");
     console.log(`Total de páginas procesadas: ${pages.length}`);
@@ -479,7 +518,7 @@ app.get("/extract-full-pdf-table", async (req: Request, res: Response) => {
 
     // Mostrar las primeras filas como ejemplo
     console.log("--- Primeras 5 filas del resultado combinado ---");
-    combinedTable.rows.slice(0, 5).forEach((row, index) => {
+    combinedTable.rows.slice(0, 5).forEach((row: any, index: number) => {
       console.log(`Fila ${index + 1}:`, row);
     });
     console.log("===================================");
