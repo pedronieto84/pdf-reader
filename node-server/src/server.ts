@@ -5,7 +5,7 @@ import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { Root, Resultado, Item } from "./interfaces.js";
-import { getPageData } from "./helpers.js";
+import { getHorizontalLines, getPageData } from "./helpers.js";
 
 // Para ES modules, necesitamos recrear __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -258,6 +258,7 @@ app.get("/test", (req: Request, res: Response): void => {
     const filteredData = filterByPage(jsonData, pageNumber);
 
     const pageData = getPageData(filteredData);
+    const horizontalLines = getHorizontalLines(jsonData);
     
     // Respuesta exitosa
     res.json({

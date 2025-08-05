@@ -17,18 +17,26 @@ const tableStructure= {
 export function getPageData(data:any): TextBlock[] {
 
   // bbox ex [x0, y0, x1 , y1]
-  console.log("getPageData", data.resultado.items);
-    const arrayBlocks =  data.resultado.items[0].text_blocks;
-
-    // Primero quitamos todos los que están encima de la fila 176.4
-    const filteredBlocks = arrayBlocks.filter((block: TextBlock) => {
-      const bbox = block.bbox;
-      // bbox[1] es la coordenada y0
-      return bbox[1] >= tableStructure.filaTop;
-    });
-
+  console.log("getPageData", data);
     
 
-    return filteredBlocks;
+   
+
+    return data;
 }
 
+export function getHorizontalLines(data:any){
+  const lines = data.data.horizontal_lines
+  const horizontalLines = lines.filter((line:{
+    pageNumber:number, horizontal_lines:{number:number}
+  })=>{
+    if(line.horizontal_lines.number>5){
+      return true
+    }else{
+      return false
+    }
+  })
+
+  console.log("getHorizontalLines", horizontalLines);
+
+}
