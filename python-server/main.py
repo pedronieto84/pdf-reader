@@ -37,14 +37,14 @@ def find_pdf_file(municipio: str, informe: str) -> Optional[Path]:
 
 def extract_pdf_items(pdf_path: Path, page_num: Optional[int] = None) -> Dict[str, Any]:
     """
-    Extrae items del PDF usando PyMuPDF
+    Extrae items del PDF usando PyMuPDF, incluyendo líneas horizontales gráficas
     
     Args:
         pdf_path: Ruta al archivo PDF
         page_num: Número de página específica (opcional)
     
     Returns:
-        Diccionario con los items extraídos
+        Diccionario con los items extraídos incluyendo líneas horizontales
     """
     try:
         doc = fitz.open(pdf_path)
@@ -78,12 +78,58 @@ def extract_pdf_items(pdf_path: Path, page_num: Optional[int] = None) -> Dict[st
             # Extraer enlaces
             links = page.get_links()
             
+            # Extraer líneas horizontales gráficas
+            horizontal_lines = []
+            paths = page.get_drawings()
+            
+            for path_idx, path in enumerate(paths):
+                # Analizar cada elemento del path
+                for item in path["items"]:
+                    # Buscar líneas (comando "l" = line to)
+                    if item[0] == "l":  # Comando de línea
+                        start_point = item[1]  # Punto inicial [x, y]
+                        end_point = item[2]    # Punto final [x, y]
+                        
+                        # Calcular si es una línea horizontal (diferencia mínima en Y)
+                        y_diff = abs(end_point[1] - start_point[1])
+                        x_diff = abs(end_point[0] - start_point[0])
+                        
+                        # Considerar horizontal si la diferencia en Y es muy pequeña
+                        # y la longitud en X es significativa
+                        if y_diff <= 2 and x_diff >= 10:  # Tolerancia de 2 píxeles en Y, mínimo 10 en X
+                            y_position = (start_point[1] + end_point[1]) / 2
+                            horizontal_lines.append(y_position)
+                    
+                    # También buscar rectángulos que puedan ser líneas horizontales gruesas
+                    elif item[0] == "re":  # Comando de rectángulo
+                        rect = item[1]  # [x, y, width, height]
+                        x, y, width, height = rect
+                        
+                        # Si el rectángulo es muy delgado en altura pero largo en anchura
+                        # puede ser una línea horizontal gruesa
+                        if height <= 5 and width >= 10:  # Altura máxima 5px, anchura mínima 10px
+                            y_position = y + height/2
+                            horizontal_lines.append(y_position)
+            
+            # Ordenar líneas por posición Y y eliminar duplicados cercanos
+            horizontal_lines.sort()
+            unique_lines = []
+            tolerance = 3  # Tolerancia para considerar líneas duplicadas
+            
+            for y_pos in horizontal_lines:
+                if not unique_lines or all(abs(y_pos - existing) > tolerance for existing in unique_lines):
+                    unique_lines.append(round(y_pos, 2))
+            
             page_items = {
                 "page_number": page_idx + 1,
                 "text": text,
                 "text_blocks": [],
                 "images": [],
-                "links": []
+                "links": [],
+                "horizontal_lines": {
+                    "number": len(unique_lines),
+                    "yPositions": unique_lines
+                }
             }
             
             # Procesar bloques de texto con coordenadas
@@ -287,34 +333,24 @@ async def root():
 async def test_endpoint(
     poble: str = Query(..., description="Nombre del pueblo (collbato, santboi, premia)"),
     informe: str = Query(..., description="Tipo de informe (a, bens)"),
-    pag: Optional[int] = Query(None, description="Número de página específica (opcional)", ge=1),
-    lines: bool = Query(False, description="Extraer solo líneas gráficas horizontales (requiere especificar 'pag')")
+    pag: Optional[int] = Query(None, description="Número de página específica (opcional)", ge=1)
 ):
     """
-    Endpoint que procesa un PDF usando PyMuPDF
+    Endpoint que procesa un PDF usando PyMuPDF incluyendo líneas horizontales
     
     Args:
         poble (str): Nombre del pueblo (collbato, santboi, premia)
         informe (str): Tipo de informe (a, bens)
         pag (int, optional): Número de página específica. Si no se proporciona, procesa todo el PDF
-        lines (bool, optional): Si es True, extrae solo líneas gráficas horizontales de la página (requiere pag)
     
     Returns:
-        dict: Items extraídos del PDF con PyMuPDF o líneas gráficas si lines=True
+        dict: Items extraídos del PDF con PyMuPDF incluyendo líneas horizontales en cada página
     """
     timestamp = datetime.now().strftime("%H:%M:%S")
     print(f"🐍 [{timestamp}] PETICIÓN RECIBIDA en endpoint /test")
-    print(f"🐍 [{timestamp}] Parámetros recibidos: poble='{poble}', informe='{informe}', pag={pag}, lines={lines}")
+    print(f"🐍 [{timestamp}] Parámetros recibidos: poble='{poble}', informe='{informe}', pag={pag}")
     
     try:
-        # Validar que si se especifica lines=True, también debe especificarse pag
-        if lines and pag is None:
-            print(f"🐍 [{timestamp}] ERROR: Parámetro 'lines=True' requiere especificar 'pag'")
-            raise HTTPException(
-                status_code=400,
-                detail="El parámetro 'lines=True' requiere especificar el número de página 'pag'"
-            )
-        
         # Validar municipio
         if poble not in VALID_MUNICIPIOS:
             print(f"🐍 [{timestamp}] ERROR: Municipio '{poble}' no válido")
@@ -343,33 +379,27 @@ async def test_endpoint(
         
         print(f"🐍 [{timestamp}] Archivo PDF encontrado: {pdf_path}")
         
-        # Extraer items del PDF o solo líneas gráficas horizontales
-        if lines:
-            print(f"🐍 [{timestamp}] Extrayendo SOLO LÍNEAS GRÁFICAS HORIZONTALES de la página {pag} con PyMuPDF...")
-            pdf_items = extract_lines_from_page(pdf_path, pag)
-        else:
-            print(f"🐍 [{timestamp}] Procesando PDF con PyMuPDF...")
-            pdf_items = extract_pdf_items(pdf_path, pag)
+        # Extraer items del PDF incluyendo líneas horizontales
+        print(f"🐍 [{timestamp}] Procesando PDF con PyMuPDF (incluyendo líneas horizontales)...")
+        pdf_items = extract_pdf_items(pdf_path, pag)
         
         response = {
             "message": "PDF procesado exitosamente con PyMuPDF",
             "parameters": {
                 "poble": poble,
                 "informe": informe,
-                "pag": pag,
-                "lines_only": lines
+                "pag": pag
             },
             "pdf_info": {
                 "file_path": str(pdf_path),
                 "file_name": pdf_path.name,
-                "extraction_mode": "horizontal_graphic_lines" if lines else "full_content"
+                "extraction_mode": "full_content_with_horizontal_lines"
             },
             "data": pdf_items,
             "timestamp": timestamp
         }
         
-        extraction_type = "líneas gráficas horizontales" if lines else "contenido completo"
-        print(f"🐍 [{timestamp}] RESPUESTA ENVIADA desde endpoint /test - {extraction_type} procesado")
+        print(f"🐍 [{timestamp}] RESPUESTA ENVIADA desde endpoint /test - contenido completo con líneas horizontales procesado")
         return response
         
     except HTTPException:
@@ -378,20 +408,6 @@ async def test_endpoint(
     except Exception as e:
         print(f"🐍 [{timestamp}] ERROR INESPERADO: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error interno del servidor: {str(e)}")
-    
-    return {
-        "message": "PDF procesado correctamente",
-        "parametros": {
-            "poble": poble,
-            "informe": informe,
-            "pag": pag
-        },
-        "archivo": {
-            "nombre": pdf_path.name,
-            "ruta": str(pdf_path.relative_to(DOCUMENTS_DIR))
-        },
-        "resultado": pdf_items
-    }
 
 @app.get("/archivos")
 async def list_available_files():
