@@ -1,6 +1,27 @@
 # PDF Reader FastAPI Project
 
-Un proyecto de FastAPI para procesar documentos PDF con un endpoint de prueba.
+Un proyecto de FastAPI para procesar documentos PDF usando PyMuPDF.
+
+## Estructura de archivos
+
+El proyecto espera que los documentos PDF estén organizados de la siguiente manera:
+
+```
+python-server/
+├── documentos-parsear/
+│   ├── collbato/
+│   │   ├── collbato_a.pdf
+│   │   └── collbato_bens.pdf
+│   ├── santboi/
+│   │   ├── santboi_a.pdf
+│   │   └── santboi_bens.pdf
+│   └── premia/
+│       ├── premia_a.pdf
+│       └── premia_bens.pdf
+├── main.py
+├── requirements.txt
+└── README.md
+```
 
 ## Instalación
 
@@ -63,19 +84,34 @@ Una vez que el servidor esté ejecutándose, puedes acceder a:
 ## Endpoints
 
 ### GET /
+Endpoint raíz que devuelve información básica de la API y los municipios/informes disponibles.
 
-Endpoint raíz que devuelve información básica de la API.
+### GET /archivos
+Lista todos los archivos PDF disponibles y faltantes en el sistema.
 
 ### GET /test
+Procesa un PDF usando PyMuPDF y extrae todos sus elementos.
 
-Endpoint de prueba que acepta los siguientes query parameters:
+**Query parameters:**
+- **poble** (string, requerido): Nombre del municipio (collbato, santboi, premia)
+- **informe** (string, requerido): Tipo de informe (a, bens)
+- **pag** (integer, opcional): Número de página específica. Si no se proporciona, procesa todo el PDF
 
-- **poble** (string, requerido): Nombre del pueblo
-- **informe** (string, requerido): Tipo de informe
-- **pag** (integer, requerido): Número de página (debe ser >= 1)
+#### Ejemplos de uso:
 
-#### Ejemplo de uso:
+1. **Procesar todo el PDF:**
+```
+GET http://localhost:8000/test?poble=santboi&informe=a
+```
 
+2. **Procesar página específica:**
+```
+GET http://localhost:8000/test?poble=premia&informe=bens&pag=5
+```
+
+3. **Listar archivos disponibles:**
+```
+GET http://localhost:8000/archivos
 ```
 GET http://localhost:8000/test?poble=Barcelona&informe=mensual&pag=1
 ```
