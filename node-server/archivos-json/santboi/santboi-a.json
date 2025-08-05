@@ -1,16 +1,859 @@
-{
-  "message": "PDF procesado correctamente",
-  "parametros": {
-    "poble": "santboi",
-    "informe": "a",
-    "pag": null
-  },
-  "archivo": {
-    "nombre": "santboi_a.pdf",
-    "ruta": "santboi\\santboi_a.pdf"
-  },
-  "resultado": {
+[
+  {
     "total_pages": 64,
+    "horizontal_lines": [
+      {
+        "pageNumber": 1,
+        "horizontal_lines": {
+          "number": 6,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            351.55
+          ]
+        }
+      },
+      {
+        "pageNumber": 2,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 3,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 4,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 5,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 6,
+        "horizontal_lines": {
+          "number": 6,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            358.55
+          ]
+        }
+      },
+      {
+        "pageNumber": 7,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 8,
+        "horizontal_lines": {
+          "number": 6,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            182.55
+          ]
+        }
+      },
+      {
+        "pageNumber": 9,
+        "horizontal_lines": {
+          "number": 7,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            221.8,
+            258.75
+          ]
+        }
+      },
+      {
+        "pageNumber": 10,
+        "horizontal_lines": {
+          "number": 7,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            224.95,
+            261.9
+          ]
+        }
+      },
+      {
+        "pageNumber": 11,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 12,
+        "horizontal_lines": {
+          "number": 6,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            285.75
+          ]
+        }
+      },
+      {
+        "pageNumber": 13,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 14,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 15,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 16,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 17,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 18,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 19,
+        "horizontal_lines": {
+          "number": 7,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            444.9,
+            481.85
+          ]
+        }
+      },
+      {
+        "pageNumber": 20,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 21,
+        "horizontal_lines": {
+          "number": 6,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            518.8
+          ]
+        }
+      },
+      {
+        "pageNumber": 22,
+        "horizontal_lines": {
+          "number": 6,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            185.55
+          ]
+        }
+      },
+      {
+        "pageNumber": 23,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 24,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 25,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 26,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 27,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 28,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 29,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 30,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 31,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 32,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 33,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 34,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 35,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 36,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 37,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 38,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 39,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 40,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 41,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 42,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 43,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 44,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 45,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 46,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 47,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 48,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 49,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 50,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 51,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 52,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 53,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 54,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 55,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 56,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 57,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 58,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 59,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 60,
+        "horizontal_lines": {
+          "number": 5,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65
+          ]
+        }
+      },
+      {
+        "pageNumber": 61,
+        "horizontal_lines": {
+          "number": 6,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            505.2
+          ]
+        }
+      },
+      {
+        "pageNumber": 62,
+        "horizontal_lines": {
+          "number": 6,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            185.55
+          ]
+        }
+      },
+      {
+        "pageNumber": 63,
+        "horizontal_lines": {
+          "number": 7,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            351.95,
+            388.9
+          ]
+        }
+      },
+      {
+        "pageNumber": 64,
+        "horizontal_lines": {
+          "number": 8,
+          "yPositions": [
+            25.3,
+            46.7,
+            69.7,
+            84.3,
+            176.65,
+            182.55,
+            550.75,
+            569.5
+          ]
+        }
+      }
+    ],
     "processed_pages": 64,
     "items": [
       {
@@ -120383,4 +121226,4 @@
       }
     ]
   }
-}
+]

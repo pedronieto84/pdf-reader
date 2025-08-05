@@ -63,6 +63,8 @@ def extract_pdf_items(pdf_path: Path, page_num: Optional[int] = None) -> Dict[st
             pages_to_process = range(total_pages)
         
         # Extraer items de las páginas especificadas
+        all_horizontal_lines = []  # Para recopilar líneas de todas las páginas procesadas
+        
         for page_idx in pages_to_process:
             page = doc[page_idx]
             
@@ -120,16 +122,19 @@ def extract_pdf_items(pdf_path: Path, page_num: Optional[int] = None) -> Dict[st
                 if not unique_lines or all(abs(y_pos - existing) > tolerance for existing in unique_lines):
                     unique_lines.append(round(y_pos, 2))
             
+            # Agregar líneas de esta página a la colección global (con referencia de página)
+            for y_pos in unique_lines:
+                all_horizontal_lines.append({
+                    "page": page_idx + 1,
+                    "y_position": y_pos
+                })
+            
             page_items = {
                 "page_number": page_idx + 1,
                 "text": text,
                 "text_blocks": [],
                 "images": [],
-                "links": [],
-                "horizontal_lines": {
-                    "number": len(unique_lines),
-                    "yPositions": unique_lines
-                }
+                "links": []
             }
             
             # Procesar bloques de texto con coordenadas
@@ -173,8 +178,40 @@ def extract_pdf_items(pdf_path: Path, page_num: Optional[int] = None) -> Dict[st
         
         doc.close()
         
+        # Preparar líneas horizontales para nivel superior
+        if page_num is not None:
+            # Si es una página específica, usar la estructura simple
+            page_lines = [line["y_position"] for line in all_horizontal_lines if line["page"] == page_num]
+            horizontal_lines_summary = {
+                "number": len(page_lines),
+                "yPositions": page_lines
+            }
+        else:
+            # Si son todas las páginas, estructurar como array de objetos por página
+            horizontal_lines_summary = []
+            
+            # Agrupar líneas por página
+            pages_dict = {}
+            for line in all_horizontal_lines:
+                page_num_key = line["page"]
+                if page_num_key not in pages_dict:
+                    pages_dict[page_num_key] = []
+                pages_dict[page_num_key].append(line["y_position"])
+            
+            # Crear array de objetos con pageNumber y horizontal_lines
+            for page_number in sorted(pages_dict.keys()):
+                y_positions = pages_dict[page_number]
+                horizontal_lines_summary.append({
+                    "pageNumber": page_number,
+                    "horizontal_lines": {
+                        "number": len(y_positions),
+                        "yPositions": y_positions
+                    }
+                })
+        
         return {
             "total_pages": total_pages,
+            "horizontal_lines": horizontal_lines_summary,
             "processed_pages": len(pages_to_process),
             "items": items
         }
