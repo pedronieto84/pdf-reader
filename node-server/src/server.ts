@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { Root, Resultado, Item } from "./interfaces.js";
 
 // Para ES modules, necesitamos recrear __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -38,6 +39,68 @@ interface APIResponse {
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Función para filtrar datos por página
+function filterByPage(data: any, pag?: number): any {
+  // Si no hay parámetro pag, devolver todos los datos
+  if (!pag) {
+    return data;
+  }
+
+  // Si los datos tienen la estructura esperada con resultado.items
+  if (
+    data.resultado &&
+    data.resultado.items &&
+    Array.isArray(data.resultado.items)
+  ) {
+    const filteredItems = data.resultado.items.filter(
+      (item: Item) => item.page_number === pag
+    );
+
+    return {
+      ...data,
+      resultado: {
+        ...data.resultado,
+        processed_pages: filteredItems.length,
+        items: filteredItems,
+      },
+      filter_info: {
+        requested_page: pag,
+        total_pages: data.resultado.total_pages,
+        page_found: filteredItems.length > 0,
+        items_in_page: filteredItems.length,
+      },
+    };
+  }
+
+  // Si los datos tienen una estructura diferente, intentar buscar en un array de items
+  if (data.items && Array.isArray(data.items)) {
+    const filteredItems = data.items.filter(
+      (item: Item) => item.page_number === pag
+    );
+
+    return {
+      ...data,
+      items: filteredItems,
+      filter_info: {
+        requested_page: pag,
+        page_found: filteredItems.length > 0,
+        items_in_page: filteredItems.length,
+      },
+    };
+  }
+
+  // Si no se puede filtrar, devolver los datos originales con información
+  return {
+    ...data,
+    filter_info: {
+      requested_page: pag,
+      page_found: false,
+      message:
+        "No se pudo filtrar por página - estructura de datos no reconocida",
+    },
+  };
+}
 
 // Función para leer archivo JSON
 function readJSONFile(poble: string, informe: string): any {
@@ -89,6 +152,29 @@ app.get("/", (req: Request, res: Response) => {
       "/test": "Obtener datos de PDF procesado desde archivos JSON",
       "/archivos": "Listar archivos JSON disponibles",
     },
+    parametros: {
+      poble: {
+        descripcion: "Nombre del municipio",
+        valores: VALID_MUNICIPIOS,
+        requerido: true,
+      },
+      informe: {
+        descripcion: "Tipo de informe",
+        valores: VALID_INFORMES,
+        requerido: true,
+      },
+      pag: {
+        descripcion: "Número de página específica (opcional)",
+        tipo: "número entero > 0",
+        requerido: false,
+        nota: "Si no se especifica, se devuelven todas las páginas",
+      },
+    },
+    ejemplos: [
+      "/test?poble=santboi&informe=bens",
+      "/test?poble=collbato&informe=a&pag=1",
+      "/test?poble=premia&informe=a&pag=3",
+    ],
     municipios_disponibles: VALID_MUNICIPIOS,
     tipos_informe: VALID_INFORMES,
     timestamp: new Date().toISOString(),
@@ -98,12 +184,19 @@ app.get("/", (req: Request, res: Response) => {
 // Endpoint principal para obtener datos
 app.get("/test", (req: Request, res: Response): void => {
   try {
-    const { poble, informe } = req.query as {
+    const { poble, informe, pag } = req.query as {
       poble?: string;
       informe?: string;
+      pag?: string;
     };
 
-    console.log(`🔍 Petición recibida - poble: ${poble}, informe: ${informe}`);
+    const pageNumber = pag ? parseInt(pag, 10) : undefined;
+
+    console.log(
+      `🔍 Petición recibida - poble: ${poble}, informe: ${informe}, pag: ${
+        pageNumber || "todas"
+      }`
+    );
 
     // Validar parámetros requeridos
     if (!poble) {
@@ -147,27 +240,47 @@ app.get("/test", (req: Request, res: Response): void => {
       return;
     }
 
+    // Validar parámetro de página si se proporciona
+    if (pag && (isNaN(pageNumber!) || pageNumber! < 1)) {
+      res.status(400).json({
+        success: false,
+        error: `Parámetro "pag" debe ser un número entero mayor a 0`,
+        received_value: pag,
+      });
+      return;
+    }
+
     // Leer archivo JSON correspondiente
     const jsonData = readJSONFile(poble, informe);
+
+    // Filtrar por página si se especifica
+    const filteredData = filterByPage(jsonData, pageNumber);
 
     // Respuesta exitosa
     res.json({
       success: true,
-      message: "Datos obtenidos exitosamente desde archivo JSON",
+      message: pageNumber
+        ? `Datos de la página ${pageNumber} obtenidos exitosamente desde archivo JSON`
+        : "Datos obtenidos exitosamente desde archivo JSON",
       parameters: {
         poble,
         informe,
+        pag: pageNumber || "todas las páginas",
       },
       file_info: {
         source: "local_json_file",
         file_name: `${poble}-${informe}.json`,
         file_path: `archivos-json/${poble}/${poble}-${informe}.json`,
       },
-      data: jsonData,
+      data: filteredData,
       timestamp: new Date().toISOString(),
     });
 
-    console.log(`✅ Respuesta enviada exitosamente para ${poble}-${informe}`);
+    console.log(
+      `✅ Respuesta enviada exitosamente para ${poble}-${informe}${
+        pageNumber ? ` página ${pageNumber}` : " (todas las páginas)"
+      }`
+    );
   } catch (error: any) {
     console.error("❌ Error en endpoint /test:", error);
 
@@ -280,10 +393,15 @@ app.use("*", (req: Request, res: Response) => {
     available_endpoints: [
       "GET /",
       "GET /test?poble={municipio}&informe={tipo}",
+      "GET /test?poble={municipio}&informe={tipo}&pag={numero}",
       "GET /archivos",
     ],
     valid_municipios: VALID_MUNICIPIOS,
     valid_informes: VALID_INFORMES,
+    ejemplos: [
+      "/test?poble=santboi&informe=bens",
+      "/test?poble=collbato&informe=a&pag=1",
+    ],
   });
 });
 
