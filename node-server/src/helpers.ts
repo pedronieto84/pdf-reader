@@ -32,9 +32,3 @@ export function getPageData(data:any): TextBlock[] {
     return filteredBlocks;
 }
 
-export function getLines(data: any){
-  // Teniendo en cuenta que estoy utilizando mupdf, como consigo capturar los elementos tipo linea
-  const arrayBlocks =  data.resultado.items[0].text_blocks;
-  const lineElements = arrayBlocks.filter((block: TextBlock) => block.type === "line");
-  return lineElements;
-}

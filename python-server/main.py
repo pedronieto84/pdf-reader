@@ -71,8 +71,8 @@ def extract_pdf_items(pdf_path: Path, page_num: Optional[int] = None) -> Dict[st
             # Extraer texto
             text = page.get_text()
             
-            # Extraer texto con posicionamiento
-            text_dict = page.get_text("dict")
+            # Extraer palabras individuales con posicionamiento exacto
+            words = page.get_text("words")
             
             # Extraer imágenes
             images = page.get_images()
@@ -80,7 +80,7 @@ def extract_pdf_items(pdf_path: Path, page_num: Optional[int] = None) -> Dict[st
             # Extraer enlaces
             links = page.get_links()
             
-            # Extraer líneas horizontales gráficas
+            # Extraer líneas horizontales gráficas usando get_text("dict") solo para líneas
             horizontal_lines = []
             paths = page.get_drawings()
             
@@ -132,23 +132,26 @@ def extract_pdf_items(pdf_path: Path, page_num: Optional[int] = None) -> Dict[st
             page_items = {
                 "page_number": page_idx + 1,
                 "text": text,
-                "text_blocks": [],
+                "words": [],
                 "images": [],
                 "links": []
             }
             
-            # Procesar bloques de texto con coordenadas
-            for block in text_dict["blocks"]:
-                if "lines" in block:  # Es un bloque de texto
-                    for line in block["lines"]:
-                        for span in line["spans"]:
-                            page_items["text_blocks"].append({
-                                "text": span["text"],
-                                "bbox": span["bbox"],  # [x0, y0, x1, y1]
-                                "font": span["font"],
-                                "size": span["size"],
-                                "flags": span["flags"]
-                            })
+            # Procesar palabras individuales con coordenadas exactas
+            for word in words:
+                # word es una tupla: (x0, y0, x1, y1, "palabra", block_no, line_no, word_no)
+                x0, y0, x1, y1, word_text, block_no, line_no, word_no = word
+                page_items["words"].append({
+                    "text": word_text,
+                    "bbox": [x0, y0, x1, y1],
+                    "block_number": block_no,
+                    "line_number": line_no,
+                    "word_number": word_no,
+                    "x0": x0,
+                    "y0": y0,
+                    "x1": x1,
+                    "y1": y1
+                })
             
             # Procesar imágenes
             for img_index, img in enumerate(images):
