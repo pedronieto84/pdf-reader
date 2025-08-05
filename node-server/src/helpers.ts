@@ -17,8 +17,6 @@ const tableStructure= {
 export function getPageData(data:any): TextBlock[] {
 
   // bbox ex [x0, y0, x1 , y1]
-  console.log("getPageData", data);
-    
 
    
 
@@ -37,6 +35,13 @@ export function getHorizontalLines(data:any){
     }
   })
 
-  console.log("getHorizontalLines", horizontalLines);
+  return horizontalLines.map((line:{pageNumber:number, horizontal_lines:{number:number, yPositions:number[]}})=>{
 
+    return {
+      pageNumber: line.pageNumber,
+      horizontalLines: line.horizontal_lines.number-5,
+      yPositions: line.horizontal_lines.yPositions.slice(-(line.horizontal_lines.number-5))
+    }
+
+  })
 }

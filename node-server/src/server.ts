@@ -259,6 +259,7 @@ app.get("/test", (req: Request, res: Response): void => {
 
     const pageData = getPageData(filteredData);
     const horizontalLines = getHorizontalLines(jsonData);
+    console.log('horizontalLines', horizontalLines);
     
     // Respuesta exitosa
     res.json({
