@@ -4,6 +4,7 @@ import uvicorn
 import fitz  # PyMuPDF
 import os
 from pathlib import Path
+from datetime import datetime
 
 # Crear la instancia de FastAPI
 app = FastAPI(
@@ -135,24 +136,159 @@ def extract_pdf_items(pdf_path: Path, page_num: Optional[int] = None) -> Dict[st
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error procesando PDF: {str(e)}")
 
+def extract_lines_from_page(pdf_path: Path, page_num: int) -> Dict[str, Any]:
+    """
+    Extrae las líneas gráficas horizontales (elementos dibujados) de una página específica del PDF
+    
+    Args:
+        pdf_path: Ruta al archivo PDF
+        page_num: Número de página específica (requerido)
+    
+    Returns:
+        Diccionario con las líneas gráficas horizontales extraídas de la página
+    """
+    try:
+        doc = fitz.open(pdf_path)
+        total_pages = len(doc)
+        
+        # Validar que la página existe
+        if page_num < 1 or page_num > total_pages:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Página {page_num} no válida. El documento tiene {total_pages} páginas"
+            )
+        
+        page_idx = page_num - 1  # PyMuPDF usa índices base 0
+        page = doc[page_idx]
+        
+        # Extraer elementos gráficos (líneas dibujadas)
+        horizontal_lines = []
+        
+        # Obtener paths (elementos gráficos) de la página
+        paths = page.get_drawings()
+        
+        for path_idx, path in enumerate(paths):
+            # Analizar cada elemento del path
+            for item in path["items"]:
+                # Buscar líneas (comando "l" = line to)
+                if item[0] == "l":  # Comando de línea
+                    start_point = item[1]  # Punto inicial [x, y]
+                    end_point = item[2]    # Punto final [x, y]
+                    
+                    # Calcular si es una línea horizontal (diferencia mínima en Y)
+                    y_diff = abs(end_point[1] - start_point[1])
+                    x_diff = abs(end_point[0] - start_point[0])
+                    
+                    # Considerar horizontal si la diferencia en Y es muy pequeña
+                    # y la longitud en X es significativa
+                    if y_diff <= 2 and x_diff >= 10:  # Tolerancia de 2 píxeles en Y, mínimo 10 en X
+                        line_info = {
+                            "line_number": len(horizontal_lines) + 1,
+                            "start_point": start_point,
+                            "end_point": end_point,
+                            "y_position": (start_point[1] + end_point[1]) / 2,  # Y promedio
+                            "x_start": min(start_point[0], end_point[0]),
+                            "x_end": max(start_point[0], end_point[0]),
+                            "length": x_diff,
+                            "thickness": path.get("width", 1.0),  # Grosor de la línea con valor por defecto
+                            "color": path.get("color", None),   # Color si está disponible
+                            "stroke": path.get("stroke", None), # Información de trazo
+                            "bbox": [
+                                min(start_point[0], end_point[0]),  # x0
+                                min(start_point[1], end_point[1]),  # y0
+                                max(start_point[0], end_point[0]),  # x1
+                                max(start_point[1], end_point[1])   # y1
+                            ]
+                        }
+                        horizontal_lines.append(line_info)
+                
+                # También buscar rectángulos que puedan ser líneas horizontales gruesas
+                elif item[0] == "re":  # Comando de rectángulo
+                    rect = item[1]  # [x, y, width, height]
+                    x, y, width, height = rect
+                    
+                    # Si el rectángulo es muy delgado en altura pero largo en anchura
+                    # puede ser una línea horizontal gruesa
+                    if height <= 5 and width >= 10:  # Altura máxima 5px, anchura mínima 10px
+                        line_info = {
+                            "line_number": len(horizontal_lines) + 1,
+                            "start_point": [x, y + height/2],
+                            "end_point": [x + width, y + height/2],
+                            "y_position": y + height/2,
+                            "x_start": x,
+                            "x_end": x + width,
+                            "length": width,
+                            "thickness": float(height),  # Asegurar que sea float
+                            "type": "thick_rectangle",
+                            "color": path.get("fill", path.get("color", None)),
+                            "bbox": [x, y, x + width, y + height]
+                        }
+                        horizontal_lines.append(line_info)
+        
+        # Ordenar líneas por posición Y (de arriba hacia abajo)
+        horizontal_lines.sort(key=lambda x: x["y_position"])
+        
+        # Renumerar después del ordenamiento
+        for idx, line in enumerate(horizontal_lines):
+            line["line_number"] = idx + 1
+        
+        # Información adicional sobre las líneas
+        page_rect = page.rect
+        
+        doc.close()
+        
+        return {
+            "page_number": page_num,
+            "total_pages": total_pages,
+            "extraction_mode": "horizontal_graphic_lines",
+            "page_dimensions": {
+                "width": page_rect.width,
+                "height": page_rect.height
+            },
+            "lines_found": len(horizontal_lines),
+            "horizontal_lines": horizontal_lines,
+            "summary": {
+                "total_lines": len(horizontal_lines),
+                "average_length": sum(line["length"] for line in horizontal_lines) / len(horizontal_lines) if horizontal_lines else 0,
+                "average_thickness": sum(line["thickness"] for line in horizontal_lines if line["thickness"] is not None) / len([line for line in horizontal_lines if line["thickness"] is not None]) if any(line["thickness"] is not None for line in horizontal_lines) else 0,
+                "min_y_position": min(line["y_position"] for line in horizontal_lines) if horizontal_lines else 0,
+                "max_y_position": max(line["y_position"] for line in horizontal_lines) if horizontal_lines else 0
+            }
+        }
+        
+    except HTTPException:
+        # Re-lanzar HTTPExceptions tal como están
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error extrayendo líneas gráficas del PDF: {str(e)}")
+
 @app.get("/")
 async def root():
     """
     Endpoint raíz que devuelve información básica de la API
     """
-    return {
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    print(f"🐍 [{timestamp}] PETICIÓN RECIBIDA en endpoint raíz (/)")
+    print(f"🐍 [{timestamp}] Procesando solicitud de información básica de la API")
+    
+    response = {
         "message": "PDF Reader API con PyMuPDF",
         "version": "1.0.0",
         "status": "running",
         "municipios_disponibles": VALID_MUNICIPIOS,
-        "tipos_informe": VALID_INFORMES
+        "tipos_informe": VALID_INFORMES,
+        "timestamp": timestamp
     }
+    
+    print(f"🐍 [{timestamp}] RESPUESTA ENVIADA desde endpoint raíz")
+    return response
 
 @app.get("/test")
 async def test_endpoint(
     poble: str = Query(..., description="Nombre del pueblo (collbato, santboi, premia)"),
     informe: str = Query(..., description="Tipo de informe (a, bens)"),
-    pag: Optional[int] = Query(None, description="Número de página específica (opcional)", ge=1)
+    pag: Optional[int] = Query(None, description="Número de página específica (opcional)", ge=1),
+    lines: bool = Query(False, description="Extraer solo líneas gráficas horizontales (requiere especificar 'pag')")
 ):
     """
     Endpoint que procesa un PDF usando PyMuPDF
@@ -161,35 +297,87 @@ async def test_endpoint(
         poble (str): Nombre del pueblo (collbato, santboi, premia)
         informe (str): Tipo de informe (a, bens)
         pag (int, optional): Número de página específica. Si no se proporciona, procesa todo el PDF
+        lines (bool, optional): Si es True, extrae solo líneas gráficas horizontales de la página (requiere pag)
     
     Returns:
-        dict: Items extraídos del PDF con PyMuPDF
+        dict: Items extraídos del PDF con PyMuPDF o líneas gráficas si lines=True
     """
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    print(f"🐍 [{timestamp}] PETICIÓN RECIBIDA en endpoint /test")
+    print(f"🐍 [{timestamp}] Parámetros recibidos: poble='{poble}', informe='{informe}', pag={pag}, lines={lines}")
     
-    # Validar municipio
-    if poble not in VALID_MUNICIPIOS:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Municipio '{poble}' no válido. Opciones disponibles: {VALID_MUNICIPIOS}"
-        )
-    
-    # Validar informe
-    if informe not in VALID_INFORMES:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Informe '{informe}' no válido. Opciones disponibles: {VALID_INFORMES}"
-        )
-    
-    # Buscar el archivo PDF
-    pdf_path = find_pdf_file(poble, informe)
-    if not pdf_path:
-        raise HTTPException(
-            status_code=404, 
-            detail=f"No se encontró el archivo PDF para {poble}_{informe}.pdf"
-        )
-    
-    # Extraer items del PDF
-    pdf_items = extract_pdf_items(pdf_path, pag)
+    try:
+        # Validar que si se especifica lines=True, también debe especificarse pag
+        if lines and pag is None:
+            print(f"🐍 [{timestamp}] ERROR: Parámetro 'lines=True' requiere especificar 'pag'")
+            raise HTTPException(
+                status_code=400,
+                detail="El parámetro 'lines=True' requiere especificar el número de página 'pag'"
+            )
+        
+        # Validar municipio
+        if poble not in VALID_MUNICIPIOS:
+            print(f"🐍 [{timestamp}] ERROR: Municipio '{poble}' no válido")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Municipio '{poble}' no válido. Opciones disponibles: {VALID_MUNICIPIOS}"
+            )
+        
+        # Validar informe
+        if informe not in VALID_INFORMES:
+            print(f"🐍 [{timestamp}] ERROR: Informe '{informe}' no válido")
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Informe '{informe}' no válido. Opciones disponibles: {VALID_INFORMES}"
+            )
+        
+        # Buscar el archivo PDF
+        print(f"🐍 [{timestamp}] Buscando archivo PDF para {poble}_{informe}.pdf")
+        pdf_path = find_pdf_file(poble, informe)
+        if not pdf_path:
+            print(f"🐍 [{timestamp}] ERROR: Archivo PDF no encontrado")
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Archivo PDF no encontrado para municipio '{poble}' e informe '{informe}'"
+            )
+        
+        print(f"🐍 [{timestamp}] Archivo PDF encontrado: {pdf_path}")
+        
+        # Extraer items del PDF o solo líneas gráficas horizontales
+        if lines:
+            print(f"🐍 [{timestamp}] Extrayendo SOLO LÍNEAS GRÁFICAS HORIZONTALES de la página {pag} con PyMuPDF...")
+            pdf_items = extract_lines_from_page(pdf_path, pag)
+        else:
+            print(f"🐍 [{timestamp}] Procesando PDF con PyMuPDF...")
+            pdf_items = extract_pdf_items(pdf_path, pag)
+        
+        response = {
+            "message": "PDF procesado exitosamente con PyMuPDF",
+            "parameters": {
+                "poble": poble,
+                "informe": informe,
+                "pag": pag,
+                "lines_only": lines
+            },
+            "pdf_info": {
+                "file_path": str(pdf_path),
+                "file_name": pdf_path.name,
+                "extraction_mode": "horizontal_graphic_lines" if lines else "full_content"
+            },
+            "data": pdf_items,
+            "timestamp": timestamp
+        }
+        
+        extraction_type = "líneas gráficas horizontales" if lines else "contenido completo"
+        print(f"🐍 [{timestamp}] RESPUESTA ENVIADA desde endpoint /test - {extraction_type} procesado")
+        return response
+        
+    except HTTPException:
+        # Re-lanzar HTTPExceptions tal como están
+        raise
+    except Exception as e:
+        print(f"🐍 [{timestamp}] ERROR INESPERADO: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error interno del servidor: {str(e)}")
     
     return {
         "message": "PDF procesado correctamente",
