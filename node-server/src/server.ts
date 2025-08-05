@@ -5,6 +5,7 @@ import { readFileSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { Root, Resultado, Item } from "./interfaces.js";
+import { getPageData } from "./helpers.js";
 
 // Para ES modules, necesitamos recrear __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -256,6 +257,8 @@ app.get("/test", (req: Request, res: Response): void => {
     // Filtrar por página si se especifica
     const filteredData = filterByPage(jsonData, pageNumber);
 
+    const pageData = getPageData(filteredData);
+    
     // Respuesta exitosa
     res.json({
       success: true,
@@ -273,11 +276,12 @@ app.get("/test", (req: Request, res: Response): void => {
         file_path: `archivos-json/${poble}/${poble}-${informe}.json`,
       },
       data: filteredData,
+      dataFiltered: pageData,
       timestamp: new Date().toISOString(),
     });
 
     console.log(
-      `✅ Respuesta enviada exitosamente para ${poble}-${informe}${
+      `✅ Respuesta enviada exitosamente para 44 ${poble}-${informe}${
         pageNumber ? ` página ${pageNumber}` : " (todas las páginas)"
       }`
     );
