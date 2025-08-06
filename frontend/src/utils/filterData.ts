@@ -1,4 +1,4 @@
-import type { Root, TableStructure, Item, DataRelevant, Word, Rectangulo, Bbox } from "../interfaces";
+import type { Root, TableStructure, Item, DataRelevant, Word, Rectangulo, Bbox, PageStructure, Fila } from "../interfaces";
 import { evaluateIfIsIn, getAllItemsInsideSquare } from "./helpers";
 
 
@@ -81,16 +81,56 @@ const pageOrganizer = (page: Item, tabla: TableStructure): PageStructure => {
   const headerWords = getAllItemsInsideSquare(page, {x0: 0, y0: 0, x1: tabla.page.width, y1: tabla.filas[0]});
 
 
-  // Luego organizar el body con las filas y columnas
-  
+  // Cojer las posiciones de los words con codigo de 6 digitos
+  const filasPosicionesY:number[] = []
 
-  return {
-    header: headerWords,
-    body: {
-      items: page.words.filter(word => !evaluateIfIsIn(word, {x0: 0, y0: 0, x1: tabla.page.width, y1: tabla.filas[0]})),
-      // Aquí puedes agregar más lógica para organizar el cuerpo
+  const regex = /^\d{6}$/;
+  page.words.forEach((word)=>{
+    if (regex.test(word.text)){
+      return filasPosicionesY.push(word.y0)
     }
-  }; // Retorna la página organizada
+  })
+
+  
+  // Hacer un for Each de las filas
+
+  const tablaEntera: Fila[] = [];
+
+  filasPosicionesY.forEach((yPosition, index) => {
+    const y0Fila = yPosition
+    const y1Fila = filasPosicionesY[index + 1] || tabla.page.height // Asumiendo que la fila ocupa todo el ancho de la página
+    const filas: Fila = []
+    // Ahora iteramos sobre las columnas
+    tabla.columnas.forEach((x0Columna, colIndex) => {
+      const x1Columna = tabla.columnas[colIndex + 1] || tabla.page.width; // Asumiendo que la columna ocupa todo el ancho de la página
+      
+      // Crear un rectángulo para la celda
+      const rectangulo: Rectangulo = {
+        x0: x0Columna,
+        y0: y0Fila,
+        x1: x1Columna,
+        y1: y1Fila
+      };
+
+      // Obtener los items dentro de este rectángulo
+      const itemsEnRectanguloCelda = getAllItemsInsideSquare(page, rectangulo);
+      
+      // Agrego los items de la celda a la fila
+      filas.push(itemsEnRectanguloCelda);
+      // Aquí puedes hacer algo con los itemsEnRectangulo, como agregarlos a una estructura de filas
+      
+    });
+
+    tablaEntera.push(filas)
+  });
+
+  const objectToReturn: PageStructure = {header: headerWords,
+    body: {
+      filas: [...tablaEntera]
+      // Aquí puedes agregar más lógica para organizar el cuerpo
+    }}
+    console.log('Object final', objectToReturn);
+  return objectToReturn // Retorna la página organizada
 };
 
 
