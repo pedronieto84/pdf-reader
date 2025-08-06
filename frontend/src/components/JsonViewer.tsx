@@ -13,13 +13,17 @@ interface ErrorData {
   details: string;
 }
 
-function JsonViewer({ data, title = "Datos JSON", loading = false }: JsonViewerProps) {
+function JsonViewer({
+  data,
+  title = "Datos JSON",
+  loading = false,
+}: JsonViewerProps) {
   // Usar useMemo en lugar de useEffect + useState para evitar bucles
   const filteredData = useMemo(() => {
     if (data) {
       try {
         // Verificar si los datos tienen la estructura esperada
-        if (typeof data === 'object' && 'data' in data && 'message' in data) {
+        if (typeof data === "object" && "data" in data && "message" in data) {
           return filterData(data as Root);
         } else {
           // Si no tiene la estructura esperada, mostrar los datos tal como están
