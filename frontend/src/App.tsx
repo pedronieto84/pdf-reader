@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import Navigation from './components/Navigation';
-import FilterForm from './components/FilterForm';
-import JsonViewer from './components/JsonViewer';
+import { useState } from "react";
+import Navigation from "./components/Navigation";
+import FilterForm from "./components/FilterForm";
+import JsonViewer from "./components/JsonViewer";
 
 function App() {
   const [jsonData, setJsonData] = useState<object | null>(null);
@@ -12,7 +12,7 @@ function App() {
     option: string;
     number: number;
   }) => {
-    console.log('Filtros actualizados:', newFilters);
+    console.log("Filtros actualizados:", newFilters);
     setLoading(true);
   };
 
@@ -24,7 +24,7 @@ function App() {
   return (
     <div className="min-vh-100 d-flex flex-column">
       <Navigation />
-      
+
       <main className="flex-grow-1">
         <div className="container-fluid py-4">
           <div className="row justify-content-center">
@@ -36,16 +36,16 @@ function App() {
                   </h1>
                 </div>
                 <div className="card-body">
-                  <FilterForm 
+                  <FilterForm
                     onFiltersChange={handleFiltersChange}
                     onDataLoad={handleDataLoad}
                     loading={loading}
                   />
-                  
+
                   <div className="mt-4">
-                    <JsonViewer 
-                      data={jsonData} 
-                      title="Visualizador de Datos JSON (Datos en Bruto)" 
+                    <JsonViewer
+                      data={jsonData}
+                      title="Visualizador de Datos JSON (Datos en Bruto)"
                     />
                   </div>
                 </div>

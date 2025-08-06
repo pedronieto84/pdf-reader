@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { filterData } from '../utils/filterData';
+import { useEffect, useState } from "react";
+import { filterData } from "../utils/filterData";
 
 interface JsonViewerProps {
   data?: object | null;
@@ -24,7 +24,8 @@ function JsonViewer({ data, title = "Datos JSON" }: JsonViewerProps) {
     }
   }, [data]);
 
-  const hasError = filteredData && typeof filteredData === 'object' && 'error' in filteredData;
+  const hasError =
+    filteredData && typeof filteredData === "object" && "error" in filteredData;
 
   return (
     <div className="card">
@@ -39,7 +40,8 @@ function JsonViewer({ data, title = "Datos JSON" }: JsonViewerProps) {
               Error al cargar datos
             </h6>
             <p className="mb-0">
-              {(filteredData as ErrorData).error}: {(filteredData as ErrorData).details}
+              {(filteredData as ErrorData).error}:{" "}
+              {(filteredData as ErrorData).details}
             </p>
           </div>
         ) : filteredData ? (
@@ -49,20 +51,19 @@ function JsonViewer({ data, title = "Datos JSON" }: JsonViewerProps) {
                 Datos cargados correctamente
               </span>
               <small className="text-muted">
-                {Array.isArray(filteredData) 
-                  ? `${filteredData.length} elementos` 
-                  : typeof filteredData === 'object' 
-                    ? `${Object.keys(filteredData as object).length} propiedades`
-                    : 'Datos disponibles'
-                }
+                {Array.isArray(filteredData)
+                  ? `${filteredData.length} elementos`
+                  : typeof filteredData === "object"
+                  ? `${Object.keys(filteredData as object).length} propiedades`
+                  : "Datos disponibles"}
               </small>
             </div>
-            <pre 
-              className="bg-light p-3 rounded overflow-auto border" 
-              style={{ 
-                maxHeight: '500px',
-                fontSize: '0.875rem',
-                lineHeight: '1.4'
+            <pre
+              className="bg-light p-3 rounded overflow-auto border"
+              style={{
+                maxHeight: "500px",
+                fontSize: "0.875rem",
+                lineHeight: "1.4",
               }}
             >
               <code>{JSON.stringify(filteredData, null, 2)}</code>
@@ -75,7 +76,8 @@ function JsonViewer({ data, title = "Datos JSON" }: JsonViewerProps) {
               No hay datos para mostrar
             </p>
             <small>
-              Selecciona un poble y opción para cargar los datos JSON correspondientes
+              Selecciona un poble y opción para cargar los datos JSON
+              correspondientes
             </small>
           </div>
         )}

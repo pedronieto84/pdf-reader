@@ -15,24 +15,25 @@ export interface FilterParams {
 export async function loadJsonData(params: FilterParams): Promise<unknown> {
   try {
     const { poble, option } = params;
-    
+
     // Construir la ruta del archivo JSON desde public
     // Formato: /archivos-json/{poble}/{poble}-{option}.json
     const filePath = `/archivos-json/${poble}/${poble}-${option}.json`;
-    
+
     console.log(`Cargando datos desde: ${filePath}`);
-    
+
     const response = await fetch(filePath);
-    
+
     if (!response.ok) {
-      throw new Error(`Error al cargar archivo JSON: ${response.status} ${response.statusText}. Archivo: ${filePath}`);
+      throw new Error(
+        `Error al cargar archivo JSON: ${response.status} ${response.statusText}. Archivo: ${filePath}`
+      );
     }
-    
+
     const data = await response.json();
     return data;
-    
   } catch (error) {
-    console.error('Error cargando datos JSON:', error);
+    console.error("Error cargando datos JSON:", error);
     throw error;
   }
 }

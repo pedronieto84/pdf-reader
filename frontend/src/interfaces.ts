@@ -1,8 +1,7 @@
 export interface Root {
-  success: boolean
   message: string
   parameters: Parameters
-  file_info: FileInfo
+  pdf_info: PdfInfo
   data: Data
   timestamp: string
 }
@@ -10,24 +9,8 @@ export interface Root {
 export interface Parameters {
   poble: string
   informe: string
-  pag: number
+  pag: null | number;
 }
-
-export interface FileInfo {
-  source: string
-  file_name: string
-  file_path: string
-}
-
-export interface Data {
-  message: string
-  parameters: Parameters
-  pdf_info: PdfInfo
-  data: Data2
-  timestamp: string
-  filter_info: FilterInfo
-}
-
 
 export interface PdfInfo {
   file_path: string
@@ -35,7 +18,7 @@ export interface PdfInfo {
   extraction_mode: string
 }
 
-export interface Data2 {
+export interface Data {
   total_pages: number
   horizontal_lines: HorizontalLine[]
   processed_pages: number
@@ -56,8 +39,8 @@ export interface Item {
   page_number: number
   text: string
   words: Word[]
-  images: any[]
-  links: any[]
+  images: unknown[]
+  links: unknown[]
 }
 
 export interface Word {
@@ -70,10 +53,4 @@ export interface Word {
   y0: number
   x1: number
   y1: number
-}
-
-export interface FilterInfo {
-  requested_page: number
-  page_found: boolean
-  message: string
 }

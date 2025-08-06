@@ -5,6 +5,8 @@
  */
 export function filterData(data: unknown): unknown {
   // Por ahora simplemente devuelve la data tal cual
+
+  
   return data;
 }
 

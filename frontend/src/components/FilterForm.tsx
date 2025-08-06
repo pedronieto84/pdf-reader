@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 interface FilterFormProps {
   onFiltersChange?: (filters: {
@@ -10,27 +10,31 @@ interface FilterFormProps {
   loading?: boolean;
 }
 
-function FilterForm({ onFiltersChange, onDataLoad, loading = false }: FilterFormProps) {
-  const [poble, setPobre] = useState('santboi');
-  const [option, setOption] = useState('a');
+function FilterForm({
+  onFiltersChange,
+  onDataLoad,
+  loading = false,
+}: FilterFormProps) {
+  const [poble, setPobre] = useState("santboi");
+  const [option, setOption] = useState("a");
   const [number, setNumber] = useState(1);
 
   const handlePobleChange = async (value: string) => {
     setPobre(value);
     const newFilters = { poble: value, option, number };
-    
+
     if (onFiltersChange) {
       onFiltersChange(newFilters);
     }
-    
+
     if (onDataLoad) {
       try {
-        const { loadJsonData } = await import('../utils/jsonService');
+        const { loadJsonData } = await import("../utils/jsonService");
         const data = await loadJsonData(newFilters);
         onDataLoad(data);
       } catch (error) {
-        console.error('Error loading data:', error);
-        onDataLoad({ error: 'Error cargando datos', details: String(error) });
+        console.error("Error loading data:", error);
+        onDataLoad({ error: "Error cargando datos", details: String(error) });
       }
     }
   };
@@ -38,19 +42,19 @@ function FilterForm({ onFiltersChange, onDataLoad, loading = false }: FilterForm
   const handleOptionChange = async (value: string) => {
     setOption(value);
     const newFilters = { poble, option: value, number };
-    
+
     if (onFiltersChange) {
       onFiltersChange(newFilters);
     }
-    
+
     if (onDataLoad) {
       try {
-        const { loadJsonData } = await import('../utils/jsonService');
+        const { loadJsonData } = await import("../utils/jsonService");
         const data = await loadJsonData(newFilters);
         onDataLoad(data);
       } catch (error) {
-        console.error('Error loading data:', error);
-        onDataLoad({ error: 'Error cargando datos', details: String(error) });
+        console.error("Error loading data:", error);
+        onDataLoad({ error: "Error cargando datos", details: String(error) });
       }
     }
   };
@@ -58,7 +62,7 @@ function FilterForm({ onFiltersChange, onDataLoad, loading = false }: FilterForm
   const handleNumberChange = (value: number) => {
     setNumber(value);
     const newFilters = { poble, option, number: value };
-    
+
     if (onFiltersChange) {
       onFiltersChange(newFilters);
     }
@@ -66,19 +70,19 @@ function FilterForm({ onFiltersChange, onDataLoad, loading = false }: FilterForm
 
   const handleLoadData = async () => {
     const currentFilters = { poble, option, number };
-    
+
     if (onFiltersChange) {
       onFiltersChange(currentFilters);
     }
-    
+
     if (onDataLoad) {
       try {
-        const { loadJsonData } = await import('../utils/jsonService');
+        const { loadJsonData } = await import("../utils/jsonService");
         const data = await loadJsonData(currentFilters);
         onDataLoad(data);
       } catch (error) {
-        console.error('Error loading data:', error);
-        onDataLoad({ error: 'Error cargando datos', details: String(error) });
+        console.error("Error loading data:", error);
+        onDataLoad({ error: "Error cargando datos", details: String(error) });
       }
     }
   };
@@ -93,9 +97,9 @@ function FilterForm({ onFiltersChange, onDataLoad, loading = false }: FilterForm
           <span>Cargando datos...</span>
         </div>
       )}
-      
+
       <div className="row g-3">
-        <div className="col-md-4">
+        <div className="col-md-3">
           <label htmlFor="poble-select" className="form-label fw-bold">
             Poble
           </label>
@@ -112,7 +116,7 @@ function FilterForm({ onFiltersChange, onDataLoad, loading = false }: FilterForm
           </select>
         </div>
 
-        <div className="col-md-4">
+        <div className="col-md-3">
           <label htmlFor="option-select" className="form-label fw-bold">
             Opción
           </label>
@@ -128,7 +132,7 @@ function FilterForm({ onFiltersChange, onDataLoad, loading = false }: FilterForm
           </select>
         </div>
 
-        <div className="col-md-4">
+        <div className="col-md-3">
           <label htmlFor="number-input" className="form-label fw-bold">
             Número
           </label>
@@ -142,6 +146,17 @@ function FilterForm({ onFiltersChange, onDataLoad, loading = false }: FilterForm
             onChange={(e) => handleNumberChange(parseInt(e.target.value) || 1)}
             disabled={loading}
           />
+        </div>
+
+        <div className="col-md-3">
+          <label className="form-label fw-bold">&nbsp;</label>
+          <button
+            className="btn btn-primary d-block w-100"
+            onClick={handleLoadData}
+            disabled={loading}
+          >
+            {loading ? "Cargando..." : "Cargar Datos"}
+          </button>
         </div>
       </div>
     </div>
