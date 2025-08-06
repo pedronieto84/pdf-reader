@@ -1,4 +1,4 @@
-import type { Bbox, Rectangulo, Word } from "../interfaces";
+import type { Bbox, Item, Rectangulo, Word } from "../interfaces";
 
 
 
@@ -22,6 +22,19 @@ export const evaluateIfIsIn = ( smallItem: Word, bigItem: (Bbox | Rectangulo) ):
   }
 
   return false;
+}
+
+export const getAllItemsInsideSquare = ( page:Item, square: Rectangulo ): Word[]=>{
+
+  const wordsInside: Word[] = [];
+
+  page.words.forEach(word => {
+    if (evaluateIfIsIn(word, square)) {
+      wordsInside.push(word);
+    }
+  });
+
+  return wordsInside;
 }
 
 

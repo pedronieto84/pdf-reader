@@ -16,9 +16,10 @@ export function filterData(data: Root): Root {
 
 
 export const tabla: TableStructure = {
-    columnas: [0, 50.4, 92.16, 119.52, 280.08, 323.28, 414, 489.6, 598.32, 696.96, 747.36],
-    filas: [176.4, 213.12],
+    columnas: [ 0, 50.4, 92.16, 119.52, 280.08, 323.28, 414, 489.6, 598.32, 696.96, 747.36],
+    filas: [ 176.4, 213.12 ],
     grosorYTotales: 36.72,
+    page:{ width: 889.92, height: 597.6 }
   
 }
 

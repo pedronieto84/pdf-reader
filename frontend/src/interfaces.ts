@@ -59,7 +59,11 @@ export interface Word {
 export interface TableStructure {
   columnas: number[]
   filas: number[]
-  grosorYTotales: number
+  grosorYTotales: number,
+  page:{
+    height: number,
+    width: number
+  }
 }
 
 
