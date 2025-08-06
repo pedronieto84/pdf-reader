@@ -1,5 +1,5 @@
 import type { Root, TableStructure, Item, DataRelevant, Word, Rectangulo, Bbox } from "../interfaces";
-import { evaluateIfIsIn } from "./helpers";
+import { evaluateIfIsIn, getAllItemsInsideSquare } from "./helpers";
 
 
 export function filterData(data: Root): Root {
@@ -15,7 +15,7 @@ export function filterData(data: Root): Root {
 
 
 
-export const tabla: TableStructure = {
+const tabla: TableStructure = {
     columnas: [ 0, 50.4, 92.16, 119.52, 280.08, 323.28, 414, 489.6, 598.32, 696.96, 747.36],
     filas: [ 176.4, 213.12 ],
     grosorYTotales: 36.72,
@@ -33,7 +33,11 @@ export const tabla: TableStructure = {
   // Cuantos Items hay en total
   let totalWords = 0;
   data.data.items.forEach((item: Item) => {
+    // Aqui estoy dentro de cada item, que es una página
     totalWords += item.words.length
+
+    // Organizar la página
+    pageOrganizer(item, tabla);
   });
  
   dataRelevant.words = totalWords;
@@ -74,7 +78,10 @@ const pageOrganizer = (page: Item, tabla: TableStructure): PageStructure => {
 
   // Primero tengo que poner los items que van en el header en el header
 
-  const headerFila = tabla.filas[0]
+  const headerWords = getAllItemsInsideSquare(page, {x0: 0, y0: 0, x1: tabla.page.width, y1: tabla.filas[0]});
+  console.log("Header words:", headerWords);
+
+
   // Luego organizar el body con las filas y columnas
 
   return page; // Retorna la página organizada
