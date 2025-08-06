@@ -79,12 +79,18 @@ const pageOrganizer = (page: Item, tabla: TableStructure): PageStructure => {
   // Primero tengo que poner los items que van en el header en el header
 
   const headerWords = getAllItemsInsideSquare(page, {x0: 0, y0: 0, x1: tabla.page.width, y1: tabla.filas[0]});
-  console.log("Header words:", headerWords);
 
 
   // Luego organizar el body con las filas y columnas
+  
 
-  return page; // Retorna la página organizada
+  return {
+    header: headerWords,
+    body: {
+      items: page.words.filter(word => !evaluateIfIsIn(word, {x0: 0, y0: 0, x1: tabla.page.width, y1: tabla.filas[0]})),
+      // Aquí puedes agregar más lógica para organizar el cuerpo
+    }
+  }; // Retorna la página organizada
 };
 
 
