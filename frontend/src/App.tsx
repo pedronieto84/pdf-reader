@@ -1,35 +1,61 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from 'react';
+import Navigation from './components/Navigation';
+import FilterForm from './components/FilterForm';
+import JsonViewer from './components/JsonViewer';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [jsonData, setJsonData] = useState<object | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleFiltersChange = (newFilters: {
+    poble: string;
+    option: string;
+    number: number;
+  }) => {
+    console.log('Filtros actualizados:', newFilters);
+    setLoading(true);
+  };
+
+  const handleDataLoad = (data: unknown) => {
+    setLoading(false);
+    setJsonData(data as object);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div className="min-vh-100 d-flex flex-column">
+      <Navigation />
+      
+      <main className="flex-grow-1">
+        <div className="container-fluid py-4">
+          <div className="row justify-content-center">
+            <div className="col-12 col-lg-10 col-xl-8">
+              <div className="card shadow">
+                <div className="card-header bg-primary text-white">
+                  <h1 className="card-title mb-0 h3">
+                    PDF Reader - Configuración y Datos
+                  </h1>
+                </div>
+                <div className="card-body">
+                  <FilterForm 
+                    onFiltersChange={handleFiltersChange}
+                    onDataLoad={handleDataLoad}
+                    loading={loading}
+                  />
+                  
+                  <div className="mt-4">
+                    <JsonViewer 
+                      data={jsonData} 
+                      title="Visualizador de Datos JSON (Datos en Bruto)" 
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
 }
 
-export default App
+export default App;
