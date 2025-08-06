@@ -71,3 +71,14 @@ export interface DataRelevant {
   paginasConStart: number[]
   paginasConEnd: number[]
 }
+
+export interface PageStructured{
+  header: Word[]
+  body: {
+    filas: Fila[]
+  }
+}
+
+export type Fila = Celda[]
+
+export type Celda = Word[]

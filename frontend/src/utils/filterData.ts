@@ -40,7 +40,6 @@ const tabla: TableStructure = {
 
   data.data.horizontal_lines.forEach((line, index) => {
     if (line.horizontal_lines.number > 5) {
-      console.log('Página con totales:', line);
       paginasConTotales.push(index + 1); // Guardar el número de página
     }
   });
@@ -52,8 +51,6 @@ const tabla: TableStructure = {
 
   // Aquí identifico las que tienen y/o end
 
-
-
   return data;
 }
 
@@ -62,6 +59,8 @@ export default filterData;
 
 
 // Función para identificar una página que tipo de página es
+
+
 
 
 
