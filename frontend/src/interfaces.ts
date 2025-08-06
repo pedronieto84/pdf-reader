@@ -45,7 +45,7 @@ export interface Item {
 
 export interface Word {
   text: string
-  bbox: number[]
+  bbox: Bbox
   block_number: number
   line_number: number
   word_number: number
@@ -60,7 +60,6 @@ export interface TableStructure {
   columnas: number[]
   filas: number[]
   grosorYTotales: number
-
 }
 
 
@@ -72,7 +71,7 @@ export interface DataRelevant {
   paginasConEnd: number[]
 }
 
-export interface PageStructured{
+export interface PageStructure{
   header: Word[]
   body: {
     filas: Fila[]
@@ -82,3 +81,12 @@ export interface PageStructured{
 export type Fila = Celda[]
 
 export type Celda = Word[]
+
+export type Bbox = [number, number, number, number];
+
+export type Rectangulo = {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
