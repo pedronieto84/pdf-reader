@@ -22,7 +22,7 @@ export interface Data {
   total_pages: number
   horizontal_lines: HorizontalLine[]
   processed_pages: number
-  items: Item[]
+  pagina: Pagina[]
 }
 
 export interface HorizontalLine {
@@ -35,7 +35,7 @@ export interface HorizontalLines {
   yPositions: number[]
 }
 
-export interface Item {
+export interface Pagina {
   page_number: number
   text: string
   words: Word[]
@@ -53,4 +53,12 @@ export interface Word {
   y0: number
   x1: number
   y1: number
+}
+
+
+export interface TableStructure {
+  columnas: number[]
+  filas: number[]
+  grosorYTotales: number
+
 }

@@ -13,12 +13,16 @@ function App() {
     number: number;
   }) => {
     console.log("Filtros actualizados:", newFilters);
-    setLoading(true);
+    // No setear loading aquí para evitar bucles
   };
 
   const handleDataLoad = (data: unknown) => {
     setLoading(false);
     setJsonData(data as object);
+  };
+
+  const handleLoadingStart = () => {
+    setLoading(true);
   };
 
   return (
@@ -39,6 +43,7 @@ function App() {
                   <FilterForm
                     onFiltersChange={handleFiltersChange}
                     onDataLoad={handleDataLoad}
+                    onLoadingStart={handleLoadingStart}
                     loading={loading}
                   />
 
@@ -46,6 +51,7 @@ function App() {
                     <JsonViewer
                       data={jsonData}
                       title="Visualizador de Datos JSON (Datos en Bruto)"
+                      loading={loading}
                     />
                   </div>
                 </div>

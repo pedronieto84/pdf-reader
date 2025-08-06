@@ -7,12 +7,14 @@ interface FilterFormProps {
     number: number;
   }) => void;
   onDataLoad?: (data: unknown) => void;
+  onLoadingStart?: () => void;
   loading?: boolean;
 }
 
 function FilterForm({
   onFiltersChange,
   onDataLoad,
+  onLoadingStart,
   loading = false,
 }: FilterFormProps) {
   const [poble, setPobre] = useState("santboi");
@@ -27,16 +29,8 @@ function FilterForm({
       onFiltersChange(newFilters);
     }
 
-    if (onDataLoad) {
-      try {
-        const { loadJsonData } = await import("../utils/jsonService");
-        const data = await loadJsonData(newFilters);
-        onDataLoad(data);
-      } catch (error) {
-        console.error("Error loading data:", error);
-        onDataLoad({ error: "Error cargando datos", details: String(error) });
-      }
-    }
+    // Solo cargar cuando el usuario explícitamente interactúa
+    // No cargamos automáticamente para evitar bucles
   };
 
   const handleOptionChange = async (value: string) => {
@@ -47,16 +41,8 @@ function FilterForm({
       onFiltersChange(newFilters);
     }
 
-    if (onDataLoad) {
-      try {
-        const { loadJsonData } = await import("../utils/jsonService");
-        const data = await loadJsonData(newFilters);
-        onDataLoad(data);
-      } catch (error) {
-        console.error("Error loading data:", error);
-        onDataLoad({ error: "Error cargando datos", details: String(error) });
-      }
-    }
+    // Solo cargar cuando el usuario explícitamente interactúa
+    // No cargamos automáticamente para evitar bucles
   };
 
   const handleNumberChange = (value: number) => {
@@ -70,6 +56,10 @@ function FilterForm({
 
   const handleLoadData = async () => {
     const currentFilters = { poble, option, number };
+
+    if (onLoadingStart) {
+      onLoadingStart();
+    }
 
     if (onFiltersChange) {
       onFiltersChange(currentFilters);

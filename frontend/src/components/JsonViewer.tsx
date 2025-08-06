@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { filterData } from "../utils/filterData";
+import type { Root } from "../interfaces";
 
 interface JsonViewerProps {
   data?: object | null;
   title?: string;
+  loading?: boolean;
 }
 
 interface ErrorData {
@@ -11,17 +13,24 @@ interface ErrorData {
   details: string;
 }
 
-function JsonViewer({ data, title = "Datos JSON" }: JsonViewerProps) {
-  const [filteredData, setFilteredData] = useState<unknown>(null);
-
-  useEffect(() => {
+function JsonViewer({ data, title = "Datos JSON", loading = false }: JsonViewerProps) {
+  // Usar useMemo en lugar de useEffect + useState para evitar bucles
+  const filteredData = useMemo(() => {
     if (data) {
-      // Aplicar la función de filtrado
-      const processed = filterData(data);
-      setFilteredData(processed);
-    } else {
-      setFilteredData(null);
+      try {
+        // Verificar si los datos tienen la estructura esperada
+        if (typeof data === 'object' && 'data' in data && 'message' in data) {
+          return filterData(data as Root);
+        } else {
+          // Si no tiene la estructura esperada, mostrar los datos tal como están
+          return data;
+        }
+      } catch (error) {
+        console.error("Error filtering data:", error);
+        return { error: "Error procesando datos", details: String(error) };
+      }
     }
+    return null;
   }, [data]);
 
   const hasError =
@@ -33,7 +42,14 @@ function JsonViewer({ data, title = "Datos JSON" }: JsonViewerProps) {
         <h5 className="card-title mb-0">{title}</h5>
       </div>
       <div className="card-body">
-        {hasError ? (
+        {loading ? (
+          <div className="text-center py-4">
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Cargando...</span>
+            </div>
+            <p className="mt-2 text-muted">Cargando datos...</p>
+          </div>
+        ) : hasError ? (
           <div className="alert alert-danger" role="alert">
             <h6 className="alert-heading">
               <i className="me-2">⚠️</i>
